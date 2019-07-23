@@ -113,11 +113,13 @@ SDL_Color ColorList::getSDL_ColorFromCSS_Color(const std::string &input, SDL_Col
         return errorColor;
 
     Uint8 red, blue, green;
+    std::string redS, blueS, greenS;
     red = std::stoi(input.substr(1, 2), nullptr, 16);
-    blue = std::stoi(input.substr(3, 4), nullptr, 16);
-    green = std::stoi(input.substr(5, 6), nullptr, 16);
+    blue = std::stoi(input.substr(3, 2), nullptr, 16);
+    green = std::stoi(input.substr(5, 2), nullptr, 16);
 
     return SDL_Color{red, blue, green};
+    //#FFBBCC
 }
 
 // Returns true if the provided string is a valid hexadecimal number.
