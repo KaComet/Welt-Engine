@@ -66,6 +66,9 @@ bool SpriteInteractionsList::loadSpriteInteractionsFromFile(const std::string &f
                         case 0:
                             SI_number = (uint) std::strtol(tmp.c_str(), nullptr, 10);
                             break;
+                        case 1:
+                            newSI.name = tmp;
+                            break;
                         case 2:
                             newSI.dDefault = (uint) std::strtol(tmp.c_str(), nullptr, 10);
                             break;
