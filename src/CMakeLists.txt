@@ -20,6 +20,6 @@ add_executable(welt
         Sheep.cpp
         Sheep.h
         Wolf.cpp
-        Wolf.h ColorList.cpp ColorList.h resource.cpp resource.h SpriteInteractionsList.cpp SpriteInteractionsList.h)
+        Wolf.h ColorList.cpp ColorList.h resource.cpp resource.h SpriteInteractionsList.cpp SpriteInteractionsList.h Item.cpp Item.h)
 
 target_link_libraries(welt ${SDL2_LIBS} ${SDL2_IMAGE_LIBRARIES})

@@ -6,7 +6,7 @@ Sheep::Sheep() {
     selfHealth = 100;
 }
 
-EffectedType Sheep::tick(Iworld<Entity, Tile> *worldPointer) {
+EffectedType Sheep::tick(Iworld<Entity, Tile, Item> *worldPointer) {
     if (selfHealth == 0)
         return EffectedType::DELETED;
 

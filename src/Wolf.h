@@ -9,7 +9,7 @@ class Wolf : public Entity {
 public:
     Wolf();
 
-    EffectedType tick(Iworld<Entity, Tile> *worldPointer) override;
+    EffectedType tick(Iworld<Entity, Tile, Item> *worldPointer) override;
 
     EffectedType takeDamage(OID attacker, uint damageAmount, DamageType type) override;
 };

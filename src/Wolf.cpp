@@ -6,7 +6,7 @@ Wolf::Wolf() {
     objectType = 2;
 }
 
-EffectedType Wolf::tick(Iworld<Entity, Tile> *worldPointer) {
+EffectedType Wolf::tick(Iworld<Entity, Tile, Item> *worldPointer) {
     if (selfHealth == 0)
         return EffectedType::DELETED;
 

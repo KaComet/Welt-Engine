@@ -8,7 +8,7 @@ World::World(uint height, uint width) {
 
     // Create the tiles in the World. If enough memory cannot be allocated, throw bad_alloc.
     try {
-        tilesInChunk = new Tile[width * height];
+        tilesInWorld = new Tile[width * height];
     } catch (std::bad_alloc &bad) {
         throw bad;
     }
@@ -17,8 +17,9 @@ World::World(uint height, uint width) {
     worldHeight = height;
     worldWidth = width;
 
-    // Start the OID and tick counters.
+    // Start the OID, IID, and tick counters.
     nextAvailableOID = 0;
+    nextAvailableIID = 0;
     tickNumber = 0;
     chunkSize = 16;
 
@@ -36,10 +37,13 @@ World::World(uint height, uint width) {
 }
 
 World::~World() {
-    // Delete all of the tiles and entities in the World.
-    delete[] tilesInChunk;
+    // Delete all of the tiles, entities, and items in the World.
+    delete[] tilesInWorld;
     for (Entity *ent : entitiesInWorld)
         delete ent;
+
+    for (Item *itm : itemsInWorld)
+        delete itm;
 }
 
 // Returns the max coordinate an entity can have.
@@ -57,7 +61,7 @@ DisplayArrayElement World::getDisplayInfoForTile(Coordinate cord) {
 
     DisplayArrayElement result;
 
-    Tile *tmp = &tilesInChunk[(cord.y * worldWidth) + cord.x];
+    Tile *tmp = &tilesInWorld[(cord.y * worldWidth) + cord.x];
 
     result.BackgroundInfo = tmp->floorDisplay;
     result.ForegroundInfo = tmp->wallDisplay;
@@ -211,49 +215,6 @@ bool World::addEntity(Entity *entityToAdd, Coordinate cord) {
 }
 
 // Deletes an entity from the world based on it's pointer. Returns true if the entity was found and deleted.
-bool World::deleteEntity(Entity *entityPtr) {
-    auto globalIt = entitiesInWorld.begin();
-    bool foundInGlobal = false;
-
-    while (globalIt != entitiesInWorld.end()) {
-        if (*globalIt == entityPtr) {
-            foundInGlobal = true;
-            break;
-        }
-
-        ++globalIt;
-    }
-
-    if (!foundInGlobal)
-        return false;
-
-    uint chunkNumber = getChunkNumberForCoordinate(entityPtr->selfPosition);
-    auto chunkIt = entitiesInChunks.at(chunkNumber).begin();
-    bool foundInChunk = false;
-
-    while (chunkIt != entitiesInChunks.at(chunkNumber).end()) {
-        if (*chunkIt == entityPtr) {
-            foundInChunk = true;
-            break;
-        }
-
-
-        ++chunkIt;
-    }
-
-    if (foundInChunk && foundInGlobal) {
-        delete *globalIt;
-        entitiesInWorld.erase(globalIt);
-        entitiesInChunks.at(chunkNumber).erase(chunkIt);
-
-        return true;
-    }
-
-    // If we could not find an entity with the given pointer, return false.
-    return false;
-}
-
-// Deletes an entity from the world based on it's pointer. Returns true if the entity was found and deleted.
 bool World::deleteEntity(std::list<Entity *>::iterator *it) {
     auto globalIt = entitiesInWorld.begin();
     bool foundInGlobal = false;
@@ -337,58 +298,13 @@ bool World::deleteEntity(OID objectID) {
     return false;
 }
 
-// Deletes the entity on the indicated tile. Returns true if the entity was found and deleted.
-bool World::deleteEntityOnTile(Coordinate cord) {
-    if (cordOutsideBound(this->maxCord(), cord))
-        return false;
-
-    uint chunkNumber = getChunkNumberForCoordinate(cord);
-    auto chunkIt = entitiesInChunks.at(chunkNumber).begin();
-    bool foundInChunk = false;
-
-    while (chunkIt != entitiesInChunks.at(chunkNumber).end()) {
-        if ((*chunkIt)->selfPosition == cord) {
-            foundInChunk = true;
-            break;
-        }
-
-        ++chunkIt;
-    }
-
-    if (!foundInChunk)
-        return false;
-
-    auto globalIt = entitiesInWorld.begin();
-    bool foundInGlobal = false;
-
-    while (globalIt != entitiesInWorld.end()) {
-        if ((*globalIt)->selfPosition == cord) {
-            foundInGlobal = true;
-            break;
-        }
-
-        ++globalIt;
-    }
-
-    if (foundInChunk && foundInGlobal) {
-        delete *globalIt;
-        entitiesInWorld.erase(globalIt);
-        entitiesInChunks.at(chunkNumber).erase(chunkIt);
-
-        return true;
-    }
-
-    // If we could not find an entity with the given pointer, return false.
-    return false;
-}
-
 // Sets the floor material of the specified tile to the given material. Returns true if successful.
 bool World::setFloorMaterial(Coordinate cord, Material desiredMaterial) {
     if (cordOutsideBound(this->maxCord(), cord))
         return false;
 
-    tilesInChunk[(cord.y * worldWidth) + cord.x].floorMaterial = desiredMaterial;
-    tilesInChunk[(cord.y * worldWidth) + cord.x].floorDisplay = desiredMaterial.defaultDisplayFloor;
+    tilesInWorld[(cord.y * worldWidth) + cord.x].floorMaterial = desiredMaterial;
+    tilesInWorld[(cord.y * worldWidth) + cord.x].floorDisplay = desiredMaterial.defaultDisplayFloor;
 
     return true;
 }
@@ -398,9 +314,9 @@ bool World::setWallMaterial(Coordinate cord, Material desiredMaterial, uint star
     if (cordOutsideBound(this->maxCord(), cord))
         return false;
 
-    tilesInChunk[(cord.y * worldWidth) + cord.x].wallMaterial = desiredMaterial;
-    tilesInChunk[(cord.y * worldWidth) + cord.x].wallDisplay = desiredMaterial.defaultDisplayWall;
-    tilesInChunk[(cord.y * worldWidth) + cord.x].wallHealth = startingHealth;
+    tilesInWorld[(cord.y * worldWidth) + cord.x].wallMaterial = desiredMaterial;
+    tilesInWorld[(cord.y * worldWidth) + cord.x].wallDisplay = desiredMaterial.defaultDisplayWall;
+    tilesInWorld[(cord.y * worldWidth) + cord.x].wallHealth = startingHealth;
 
     return true;
 }
@@ -420,8 +336,8 @@ uint World::getChunkNumberForCoordinate(const Coordinate &cord) {
     chunkCord.y = cord.y / chunkSize;
     chunkCord.x = cord.x / chunkSize;
     chunkNumber = (chunkCord.y * nChunksPerRow) + chunkCord.x;
-    if (chunkNumber > maxChunkNumber)
-        return maxChunkNumber;
+
+    assert(chunkNumber <= maxChunkNumber);
 
     return chunkNumber;
 }
@@ -475,6 +391,8 @@ std::vector<uint> World::getChunksInRect(Coordinate rectStart, uint height, uint
             result.push_back(maxChunkNumber);
         }
     }
+
+    assert(result.size() <= (maxChunkNumber + 1));
 
     return result;
 }
@@ -559,4 +477,106 @@ std::vector<Entity *> World::getEntitiesInCircle(Coordinate circleCenter, uint r
     }
 
     return result;
+}
+
+// Adds an item to the world. Returns true if successful.
+bool World::addItem(Item *itemPtr, Coordinate cord, bool wasPreviouslyAdded) {
+    // If the item pointer is a null pointer or the desired position is
+    //   outside the bounds of the world, return false.
+    if ((!itemPtr) || cordOutsideBound(this->maxCord(), cord))
+        return false;
+
+    // Set the IID and the position of the item.
+    if (!wasPreviouslyAdded)
+        itemPtr->selfID = nextAvailableIID++;
+    itemPtr->selfPosition = cord;
+
+    // Add the item to the world and its chunk.
+    itemsInWorld.push_back(itemPtr);
+    itemsInChunks.at(this->getChunkNumberForCoordinate(cord)).push_back(itemPtr);
+
+    return true;
+}
+
+// Returns the items at the given coordinate.
+std::vector<Item *> World::getItemsAtPos(Coordinate cord) {
+    // If the given coordinate is outside the bounds of the world, return false.
+    if (cordOutsideBound(this->maxCord(), cord))
+        return std::vector<Item *>{};
+
+    std::vector<Item *> result;
+    uint chunkNumber = this->getChunkNumberForCoordinate(cord);
+    for (auto itmPtr : itemsInChunks.at(chunkNumber))
+        if (itmPtr->selfPosition == cord)
+            result.push_back(itmPtr);
+
+    return result;
+
+}
+
+// Unlinks the indicated item from world so that an entity may possess it. Returns true if successful.
+bool World::unLinkItem(IID itemToUnlink) {
+    // If the given IID has not been assigned yes, return false;
+    if (itemToUnlink >= nextAvailableIID)
+        return false;
+
+    bool itemWasFoundInWorld = false;
+    auto worldIterator = itemsInWorld.begin();
+    while (worldIterator != itemsInWorld.end()) {
+        if ((*worldIterator)->selfID == itemToUnlink) {
+            itemWasFoundInWorld = true;
+            break;
+        }
+
+    }
+
+    if (!itemWasFoundInWorld)
+        return false;
+
+    uint chunkNumber = this->getChunkNumberForCoordinate((*worldIterator)->selfPosition);
+    auto chunkIterator = itemsInChunks.at(chunkNumber).begin();
+    while (chunkIterator != itemsInChunks.at(chunkNumber).end()) {
+        if ((*chunkIterator)->selfID == itemToUnlink) {
+            itemsInWorld.erase(worldIterator);
+            itemsInChunks.at(chunkNumber).erase(chunkIterator);
+            return true;
+        }
+
+    }
+
+    return false;
+}
+
+// Deletes a linked item completely from the world. Returns true if successful.
+bool World::deleteItem(IID itemToDelete) {
+    // If the given IID has not been assigned yes, return false;
+    if (itemToDelete >= nextAvailableIID)
+        return false;
+
+    bool itemWasFoundInWorld = false;
+    auto worldIterator = itemsInWorld.begin();
+    while (worldIterator != itemsInWorld.end()) {
+        if ((*worldIterator)->selfID == itemToDelete) {
+            itemWasFoundInWorld = true;
+            break;
+        }
+
+    }
+
+    if (!itemWasFoundInWorld)
+        return false;
+
+    uint chunkNumber = this->getChunkNumberForCoordinate((*worldIterator)->selfPosition);
+    auto chunkIterator = itemsInChunks.at(chunkNumber).begin();
+    while (chunkIterator != itemsInChunks.at(chunkNumber).end()) {
+        if ((*chunkIterator)->selfID == itemToDelete) {
+            delete *worldIterator;
+            itemsInWorld.erase(worldIterator);
+            itemsInChunks.at(chunkNumber).erase(chunkIterator);
+            return true;
+        }
+
+    }
+
+    return false;
 }
