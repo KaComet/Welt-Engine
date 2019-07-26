@@ -39,13 +39,13 @@ struct Coordinate {
 };
 
 // ---------------- Enums ----------------
-enum EffectedType {
+enum class EffectedType {
     NONE,
     DELETED,
     MOVED
 };
 
-enum DamageType {
+enum class DamageType {
     KINETIC,
 };
 
