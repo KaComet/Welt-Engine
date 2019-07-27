@@ -20,12 +20,11 @@ public:
 
     SpriteInteraction get(uint elementNumber) const;
 
-    uint getBackgroundTileFromDisplayArray(uint col, uint row, DisplayArray &dis);
+    uint getBackgroundTileFromDisplayArray(uint col, uint row, DisplayArray &dis) const;
 
-    uint getForegroundTileFromDisplayArray(uint col, uint row, DisplayArray &dis);
+    uint getForegroundTileFromDisplayArray(uint col, uint row, DisplayArray &dis) const;
 
 private:
-    bool stringIsUint(const std::string &input) const;
 
     flat::FlatVector<SpriteInteraction> SI_list;
 };

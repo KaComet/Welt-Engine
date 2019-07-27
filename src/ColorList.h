@@ -13,10 +13,12 @@
 class ColorList {
 public:
     bool loadColorsFromFile(const std::string &fileName, const SDL_Color &defaultColor, const uint &maxColorNumber);
+
     SDL_Color get(const uint &colorNumber);
 
 private:
     SDL_Color getSDL_ColorFromCSS_Color(const std::string &input, SDL_Color errorColor);
+
     bool stringIsHex(const std::string &input);
 
     flat::FlatVector<SDL_Color> colorDefinitions;

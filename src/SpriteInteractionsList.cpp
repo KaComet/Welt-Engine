@@ -4,124 +4,138 @@
 bool SpriteInteractionsList::loadSpriteInteractionsFromFile(const std::string &fileName,
                                                             const SpriteInteraction &defaultValue,
                                                             const uint maxSI_number) {
+    // Determine the path of the resource.
     std::string path = getResourcePath("") + fileName;
+
+    // If the path is empty, return false.
     if (path.empty())
         return false;
 
+    // Set the capacity and default element of the SI list.
     SI_list.setDefault(defaultValue);
     SI_list.setCapacity(maxSI_number);
 
     printf("Loading sprite interactions...\n");
 
+    // Open the input file using the previously determined path.
     std::ifstream inputFile;
     inputFile.open(path);
 
+    // If the file could be opened, start loading the file. If not, return false.
     if (inputFile.is_open()) {
         uint lineNumber = 0;
         uint nLoadedSI = 0;
+
         while (!inputFile.eof()) {
-            lineNumber++;
             bool lineLoaded = true;
-            char currentLine[1024];
-            std::string SCurrentLine;
+            std::string currentLine;
             SpriteInteraction newSI = defaultValue;
             uint SI_number = 0;
 
-            inputFile.getline(currentLine, 1024);
-            SCurrentLine = currentLine;
+            // NOTE: line numbers start at one.
+            lineNumber++;
 
-            uint delemitCount = std::count(SCurrentLine.begin(), SCurrentLine.end(), ',');
+            // Load the current line.
+            std::getline(inputFile, currentLine);
+            uint delemitCount = std::count(currentLine.begin(), currentLine.end(), ',');
 
+            // If there are not the right number of delmit characters, the line must not be formatted correctly.
+            //   If this is the case, skip the current line.
             if (delemitCount != 17) {
                 lineLoaded = false;
             } else {
-                for (uint i = 0; i < 18; i++) {
-                    std::string tmp = getDelimitedContents(SCurrentLine, ',', i);
-                    tmp.shrink_to_fit();
+                // Trim any newline/carriage return characters from the string.
+                auto c = currentLine.begin();
+                while (c != currentLine.end()) {
+                    switch (*c) {
+                        case '\r':
+                        case '\n':
+                            c = currentLine.erase(c);
+                            continue;
+                    }
+                    c++;
+                }
 
+                // Scan through the current line and load its contents.
+                for (uint i = 0; i < 18; i++) {
+                    std::string tmp = getDelimitedContents(currentLine, ',', i);
+
+                    // If the current element is empty, cancel loading the line.
                     if (tmp.empty())
                         lineLoaded = false;
 
-                    switch (tmp.at(tmp.size() - 1)) {
-                        case '\r':
-                            tmp.pop_back();
-                            break;
-                        case '\n':
-                            tmp.pop_back();
-                            break;
-                        default:;
+                    // Try to convert the current element to the desired format.
+                    //   If something could not be converted, cancel loading the line.
+                    try {
+                        switch (i) {
+                            case 0:
+                                SI_number = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 1:
+                                newSI.name = tmp;
+                                break;
+                            case 2:
+                                newSI.dDefault = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 3:
+                                newSI.W = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 4:
+                                newSI.E = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 5:
+                                newSI.EW = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 6:
+                                newSI.S = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 7:
+                                newSI.SW = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 8:
+                                newSI.SE = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 9:
+                                newSI.SEW = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 10:
+                                newSI.N = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 11:
+                                newSI.NW = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 12:
+                                newSI.NE = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 13:
+                                newSI.NEW = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 14:
+                                newSI.NS = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 15:
+                                newSI.NSW = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 16:
+                                newSI.NSE = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            case 17:
+                                newSI.NSEW = (uint) std::stol(tmp, nullptr, 10);
+                                break;
+                            default:;
+                        }
                     }
-
-                    if (i == 1) {
-                        newSI.name = tmp;
-                        continue;
-                    }
-
-                    if (!stringIsUint(tmp)) {
+                    catch (const std::invalid_argument &e) {
                         lineLoaded = false;
-                        break;
                     }
-
-                    switch (i) {
-                        case 0:
-                            SI_number = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 1:
-                            newSI.name = tmp;
-                            break;
-                        case 2:
-                            newSI.dDefault = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 3:
-                            newSI.W = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 4:
-                            newSI.E = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 5:
-                            newSI.EW = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 6:
-                            newSI.S = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 7:
-                            newSI.SW = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 8:
-                            newSI.SE = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 9:
-                            newSI.SEW = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 10:
-                            newSI.N = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 11:
-                            newSI.NW = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 12:
-                            newSI.NE = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 13:
-                            newSI.NEW = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 14:
-                            newSI.NS = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 15:
-                            newSI.NSW = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 16:
-                            newSI.NSE = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        case 17:
-                            newSI.NSEW = (uint) std::strtol(tmp.c_str(), nullptr, 10);
-                            break;
-                        default:;
+                    catch (const std::out_of_range &e) {
+                        lineLoaded = false;
                     }
                 }
             }
 
+            // If the line was loaded, load the line. If the line redefined something or is
+            //   outside the range of the SI List, notify the user.
             if (lineLoaded) {
                 nLoadedSI++;
                 const flat::SetType definitionType = SI_list.set(SI_number, newSI);
@@ -136,33 +150,21 @@ bool SpriteInteractionsList::loadSpriteInteractionsFromFile(const std::string &f
                         break;
                 }
             } else {
+                // If the line was not formatted correctly, notify the user.
                 printf("   * Line %u is not formatted correctly. Skipping\n", lineNumber);
             }
         }
 
+        // When done loading the file, print how many SIs were loaded and return true.
         printf("   Loaded %u sprite interactions.\n", nLoadedSI);
 
         return true;
     } else {
+
+        // If the file could not be loaded, notify the user and return false.
         printf("   * Could not open the file \"%s\"\n", path.c_str());
         return false;
     }
-}
-
-// Returns true is the provided string is a valid unsigned integer number.
-bool SpriteInteractionsList::stringIsUint(const std::string &input) const {
-    // If the input is empty, return false.
-    if (input.empty())
-        return false;
-
-    // Scan through the string, returning false if any of the
-    //   characters are not in the range of 0-9.
-    for (auto c : input) {
-        if (!std::isdigit(c))
-            return false;
-    }
-
-    return true;
 }
 
 // Returns the SpriteInteraction for the given number.
@@ -172,7 +174,7 @@ SpriteInteraction SpriteInteractionsList::get(const uint elementNumber) const {
 
 // When given a DisplayArray and a coordinate, this function will
 //   determine the correct sprite to display in the background for the given tile.
-uint SpriteInteractionsList::getBackgroundTileFromDisplayArray(uint col, uint row, DisplayArray &dis) {
+uint SpriteInteractionsList::getBackgroundTileFromDisplayArray(uint col, uint row, DisplayArray &dis) const {
     if ((col >= dis.width) || (row >= dis.height))
         return 0;
 
@@ -227,7 +229,7 @@ uint SpriteInteractionsList::getBackgroundTileFromDisplayArray(uint col, uint ro
 
 // When given a DisplayArray and a coordinate, this function will
 //   determine the correct sprite to display in the foreground for the given tile.
-uint SpriteInteractionsList::getForegroundTileFromDisplayArray(uint col, uint row, DisplayArray &dis) {
+uint SpriteInteractionsList::getForegroundTileFromDisplayArray(uint col, uint row, DisplayArray &dis) const {
     if ((col >= dis.width) || (row >= dis.height))
         return 0;
 
