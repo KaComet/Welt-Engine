@@ -11,6 +11,17 @@ typedef unsigned int displayID; // For specifying a char/pic that is used to dis
 
 // A single element of a display array. Contains all the info needed to represent a tile.
 struct DisplayArrayElement {
+    DisplayArrayElement() {
+        BackgroundColor = COLOR_VOID;
+        ForegroundColor = COLOR_VOID;
+        BackgroundInfo = DCID_VOID;
+        ForegroundInfo = DCID_VOID;
+    }
+
+    DisplayArrayElement(DisplayID backgroundInfo, DisplayID foregroundInfo, colorID backgroundColor,
+                        colorID foregroundColor) : BackgroundInfo(backgroundInfo), ForegroundInfo(foregroundInfo),
+                                                   BackgroundColor(backgroundColor), ForegroundColor(foregroundColor) {}
+
     DisplayID BackgroundInfo, ForegroundInfo;
     colorID BackgroundColor, ForegroundColor;
 };
@@ -18,8 +29,8 @@ struct DisplayArrayElement {
 struct DisplayArray {
     uint width, height;
     DisplayArrayElement *displayData;
-    DisplayArray(): width(0), height(0), displayData(nullptr)
-    {
+
+    DisplayArray() : width(0), height(0), displayData(nullptr) {
     }
 };
 

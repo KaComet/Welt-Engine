@@ -2,7 +2,7 @@
 //
 
 #include "world.h"
-#include "FlatVector.h"
+#include "Item.h"
 #include "Sheep.h"
 #include "Wolf.h"
 #include "ltimer.h"
@@ -139,6 +139,13 @@ int main(int argc, char *args[]) {
             for (uint i = 30; i < 40; i++)
                 a.addEntity(theHerd.at(i), Coordinate{((WORLD_WIDTH / 2) + 15) + i, (WORLD_HEIGHT / 2) - 10});
 
+            // Create a test item and add it to the test world.
+            auto *testItem = new Item;
+            testItem->itemDisplay = DCID_ITEM_TEST_1;
+            testItem->selfMaterial.color = COLOR_ITEM_TEST_1;
+
+            a.addItem(testItem, Coordinate{5, 5}, false);
+
             //While application is running
             while (!quit) {
                 fpsReg.start();
@@ -222,7 +229,7 @@ int main(int argc, char *args[]) {
 }
 
 // Initializes SDL2, creates a window, and creates a renderer.
-// Call before andy SDL2 resources.
+// Call before using any SDL2 resources.
 bool init() {
     //Initialization flag
     bool success = true;

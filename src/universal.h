@@ -20,6 +20,7 @@ const DisplayID DCID_AIR = 2;
 const DisplayID DCID_GROUND_OUTSIDE = 3;
 const DisplayID DCID_SLDWALL_CONNECT = 4;
 const DisplayID DCID_ENTITY_SIMPLE = 5;
+const DisplayID DCID_ITEM_TEST_1 = 6;
 
 const colorID COLOR_VOID = 1;
 const colorID COLOR_AIR = 2;
@@ -27,6 +28,7 @@ const colorID COLOR_GRASS = 3;
 const colorID COLOR_STONE = 4;
 const colorID COLOR_ENTITY_NICE = 5;
 const colorID COLOR_ENTITY_HOSTILE = 6;
+const colorID COLOR_ITEM_TEST_1 = 7;
 
 // ---------------- Structs ----------------
 struct Coordinate {

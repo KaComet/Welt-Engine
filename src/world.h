@@ -20,23 +20,34 @@ public:
 
     // World functions
     Coordinate maxCord() override;
+
     DisplayArrayElement getDisplayInfoForTile(Coordinate cord) override;
+
     DisplayArray getDisplayArrayForWorld();
+
     void getDisplayArrayForWorld(DisplayArray &dis);
+
     // Returns how many ticks have passed since the creation of the world.
     inline uint getTickNumber() override { return tickNumber; }
 
-    // Entity functions
     void tick();
+
     bool moveEntity(Entity *entityPtr, Coordinate cord) override;
+
     bool addEntity(Entity *entityToAdd, Coordinate cord) override;
-    bool deleteEntity(std::list<Entity*>::iterator *it);
+
+    bool deleteEntity(std::list<Entity *>::iterator *it);
+
     bool deleteEntity(OID objectID);
+
     Entity *getEntityOnTile(Coordinate cord) override;
-    std::vector<Entity *> getEntitiesInLine(Coordinate lineStart, Coordinate lineEnd) override; //NU
+
+    std::vector<Entity *> getEntitiesInLine(Coordinate lineStart, Coordinate lineEnd) override;
+
     std::vector<Entity *> getEntitiesInRect(Coordinate rectStart, uint height, uint width) override;
+
     std::vector<Entity *> getEntitiesInCircle(Coordinate circleCenter, uint radius) override;
-    // Tile functions
+
     // Returns a pointer to a tile at the specified coordinate.
     // Returns nullptr if the Coordinate is out of the bounds of the World.
     inline Tile *getTileAtPos(Coordinate cccord) override {
@@ -45,16 +56,20 @@ public:
     }
 
     bool setFloorMaterial(Coordinate cord, Material desiredMaterial) override;
+
     bool setWallMaterial(Coordinate cord, Material desiredMaterial, uint startingHealth) override;
 
-    // Item Functions
     bool addItem(Item *itemPtr, Coordinate cord, bool wasPreviouslyAdded) override;
-    std::vector<Item*> getItemsAtPos(Coordinate cord) override;
+
+    std::vector<Item *> getItemsAtPos(Coordinate cord) override;
+
     bool unLinkItem(IID itemToUnlink) override;
+
     bool deleteItem(IID itemToDelete) override;
 
 private:
     uint getChunkNumberForCoordinate(const Coordinate &cord);
+
     std::vector<uint> getChunksInRect(Coordinate rectStart, uint height, uint width);
 
     Tile *tilesInWorld;
@@ -63,7 +78,7 @@ private:
     OID nextAvailableIID;
     std::list<Entity *> entitiesInWorld;
     std::vector<std::list<Entity *>> entitiesInChunks;
-    std::list<Item*> itemsInWorld;
+    std::list<Item *> itemsInWorld;
     std::vector<std::list<Item *>> itemsInChunks;
 };
 

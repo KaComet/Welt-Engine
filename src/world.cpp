@@ -23,13 +23,14 @@ World::World(uint height, uint width) {
     tickNumber = 0;
     chunkSize = 16;
 
-    // Initialize the entity chunks and calculate the max chunk number.
+    // Initialize the entity and item chunks and calculate the max chunk number.
     Coordinate maxChunkCord;
     uint nChunksPerRow = (uint) std::ceil((double) worldWidth / (double) chunkSize);
     maxChunkCord.y = worldHeight / chunkSize;
     maxChunkCord.x = worldWidth / chunkSize;
     maxChunkNumber = (maxChunkCord.y * nChunksPerRow) + maxChunkCord.x;
     entitiesInChunks.resize(maxChunkNumber + 1);
+    itemsInChunks.resize(maxChunkNumber + 1);
 
     assert(chunkSize != 0);
     assert(worldWidth != 0);
@@ -68,8 +69,17 @@ DisplayArrayElement World::getDisplayInfoForTile(Coordinate cord) {
     result.BackgroundColor = tmp->floorMaterial.color;
     result.ForegroundColor = tmp->wallMaterial.color;
 
-    //REFACTOR: move to new function to speed up drawing.
+    //TODO: move to new function to speed up drawing.
     uint chunkNumber = getChunkNumberForCoordinate(cord);
+    for (const auto &it : itemsInChunks.at(chunkNumber)) {
+        if (it->selfPosition == cord) {
+            result.ForegroundInfo = it->itemDisplay;
+            result.ForegroundColor = it->selfMaterial.color;
+            break;
+        }
+    }
+
+    //TODO: move to new function to speed up drawing,.
     for (const auto &it : entitiesInChunks.at(chunkNumber)) {
         if (it->selfPosition == cord) {
             result.ForegroundInfo = it->entityDisplay;
