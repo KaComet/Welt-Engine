@@ -18,7 +18,7 @@ public:
     //Renders texture at given point
     void render(int x, int y) const;
 
-    void renderPortion(int x, int y, SDL_Rect *portion, SDL_Rect *renderSection) const;
+    void renderPortion(SDL_Rect &portion, SDL_Rect &renderSection) const;
 
     //Gets image dimensions
     int getWidth() const;

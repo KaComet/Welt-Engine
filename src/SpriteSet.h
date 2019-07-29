@@ -23,10 +23,10 @@ public:
     uint loadFromFile(SDL_Renderer *renderer, const std::string &path, uint tileWidth, uint tileHeight);
 
     // Renders texture at given point.
-    bool render(int x, int y, displayID valueToDisplay) const;
+    bool render(unsigned int x, unsigned int y, displayID valueToDisplay) const;
 
     // Renders texture at given point in the given color.
-    bool render(int x, int y, displayID valueToDisplay, SDL_Color renderColor);
+    bool render(unsigned int x, unsigned int y, displayID valueToDisplay, SDL_Color renderColor);
 
     uint getFontWidth() const;
 

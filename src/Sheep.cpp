@@ -13,15 +13,13 @@ EffectedType Sheep::tick(Iworld<Entity, Tile, Item> *worldPointer) {
     if ((worldPointer->getTickNumber() % 5) != 0)
         return EffectedType::NONE;
 
-    std::vector<Entity*> entitiesNear = worldPointer->getEntitiesInCircle(selfPosition, 100);
-    bool fearful = false;
+    std::vector<Entity *> entitiesNear = worldPointer->getObjectsInCircle(selfPosition, 100, true, false).first;
     Entity *enemyPtr = nullptr;
     uint enemyDistance = 0;
 
-    for (const auto& entPtr : entitiesNear)
-    {
+    for (const auto &entPtr : entitiesNear) {
         if ((entPtr != this) && (entPtr != nullptr) && (entPtr->objectType == 2)) {
-            uint entDistance = (uint)ceil(distance(this->selfPosition, entPtr->selfPosition));
+            uint entDistance = (uint) ceil(distance(this->selfPosition, entPtr->selfPosition));
             if (enemyPtr == nullptr) {
                 enemyPtr = entPtr;
                 enemyDistance = entDistance;
@@ -49,7 +47,7 @@ EffectedType Sheep::tick(Iworld<Entity, Tile, Item> *worldPointer) {
 
     Coordinate nextPos = Coordinate{(selfPosition.x + delta.x) - 1, (selfPosition.y + delta.y) - 1};
     Tile *nextTile = worldPointer->getTileAtPos(nextPos);
-    Entity* nxtPtr = worldPointer->getEntityOnTile(nextPos);
+    Entity *nxtPtr = worldPointer->getObjectsOnTile(nextPos, true, false).first;
     if ((nxtPtr != nullptr) || (nextTile == nullptr) || (nextTile->wallMaterial.materialType != MaterialType::GAS))
         return EffectedType::NONE;
 
@@ -61,8 +59,7 @@ EffectedType Sheep::tick(Iworld<Entity, Tile, Item> *worldPointer) {
 }
 
 EffectedType Sheep::takeDamage(OID attacker, uint damageAmount, DamageType type) {
-    if (damageAmount >= selfHealth)
-    {
+    if (damageAmount >= selfHealth) {
         selfHealth = 0;
         return EffectedType::DELETED;
     }

@@ -6,6 +6,7 @@ Entity::Entity() {
     objectType = 0;
     selfHealth = 1;
     selfPosition = Coordinate{0, 0};
+    selfMaterial = M_AIR;
     entityDisplay = 5;
 }
 

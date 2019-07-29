@@ -181,23 +181,42 @@ bool World::moveEntity(Entity *entityPtr, Coordinate cord) {
     return true;
 }
 
-// Returns the entity on the specified tile. If the tile contains no entity, nullptr is returned.
-Entity *World::getEntityOnTile(Coordinate cord) {
+// Returns the entity and/or the items at the given tile.
+std::pair<Entity *, std::vector<Item *>>
+World::getObjectsOnTile(Coordinate cord, const bool getEntities, const bool getItems) {
+    std::pair<Entity *, std::vector<Item *>> result;
+    result.first = nullptr;
+
+    // If the given coordinate is outside the bounds of the world, return;
     if (cordOutsideBound(this->maxCord(), cord))
-        return nullptr;
+        return result;
 
+    // Find the chunk number for the coordinate.
     uint chunkNumber = getChunkNumberForCoordinate(cord);
-    auto chunkIt = entitiesInChunks.at(chunkNumber).begin();
 
-    while (chunkIt != entitiesInChunks.at(chunkNumber).end()) {
-        if ((*chunkIt)->selfPosition == cord) {
-            return *chunkIt;
+    // If it was specified to look for entities, scan through the the entities in the
+    //   chunk, looking for an entity that is on the specified tile.
+    if (getEntities) {
+        auto chunkIt = entitiesInChunks.at(chunkNumber).begin();
+
+        while (chunkIt != entitiesInChunks.at(chunkNumber).end()) {
+            if ((*chunkIt)->selfPosition == cord) {
+                result.first = *chunkIt;
+            }
+
+            chunkIt++;
         }
-
-        chunkIt++;
     }
 
-    return nullptr;
+    // If it was specified to look for items, scan through the the items in the
+    //   chunk, looking for items that are on the specified tile.
+    if (getItems) {
+        for (auto itmPtr : itemsInChunks.at(chunkNumber))
+            if (itmPtr->selfPosition == cord)
+                result.second.push_back(itmPtr);
+    }
+
+    return result;
 }
 
 // Adds the provided entity to the World at the indicated tile. Returns true if successful.
@@ -408,8 +427,9 @@ std::vector<uint> World::getChunksInRect(Coordinate rectStart, uint height, uint
 }
 
 // Note: the order of the entities in the returned vector is not in any specific order.
-std::vector<Entity *> World::getEntitiesInLine(Coordinate lineStart, Coordinate lineEnd) {
-    std::vector<Entity *> result;
+std::pair<std::vector<Entity *>, std::vector<Item *>>
+World::getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntities, bool getItems) {
+    std::pair<std::vector<Entity *>, std::vector<Item *>> result;
 
     // Bresenham's line algorithm. Adapted from https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
     bool steep = (fabs(lineEnd.y - lineStart.y) > fabs(lineEnd.x - lineStart.x));
@@ -432,10 +452,13 @@ std::vector<Entity *> World::getEntitiesInLine(Coordinate lineStart, Coordinate 
     for (uint x = lineStart.x; x < lineEnd.x; x++) {
         Coordinate currentPos = steep ? Coordinate{y, x} : Coordinate{x, y};
 
-        Entity *tmpPtr = this->getEntityOnTile(currentPos);
+        auto tileResult = this->getObjectsOnTile(currentPos, getEntities, getItems);
 
-        if (tmpPtr != nullptr)
-            result.push_back(tmpPtr);
+        if (tileResult.first)
+            result.first.push_back(tileResult.first);
+
+        if (!tileResult.second.empty())
+            result.second.insert(result.second.end(), tileResult.second.begin(), tileResult.second.end());
 
         error -= dy;
         if (error < 0) {
@@ -447,30 +470,43 @@ std::vector<Entity *> World::getEntitiesInLine(Coordinate lineStart, Coordinate 
     return result;
 }
 
-// Returns a vector containing pointers to any entities found in the given rectangle.
-std::vector<Entity *> World::getEntitiesInRect(Coordinate rectStart, uint height, uint width) {
-    std::vector<Entity *> result;
+// Returns vectors containing pointers to any entities and/or items found in the given rectangle.
+std::pair<std::vector<Entity *>, std::vector<Item *>>
+World::getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getEntities, bool getItems) {
+    std::pair<std::vector<Entity *>, std::vector<Item *>> result;
 
+    // If the width and/or the height is zero, return.
     if ((height == 0) || (width == 0))
         return result;
 
-    std::vector<uint> cChunksInRect = this->getChunksInRect(rectStart, height, width);
+    // Find the numbers of the chunks in the rectangle.
+    const std::vector<uint> cChunksInRect = this->getChunksInRect(rectStart, height, width);
 
     for (const auto &currentChunk : cChunksInRect) {
-        for (const auto &currentEntity : entitiesInChunks.at(currentChunk)) {
-            if (cordInsideRect(rectStart, height, width, currentEntity->selfPosition))
-                result.push_back(currentEntity);
+        if (getEntities) {
+            for (const auto &currentEntity : entitiesInChunks.at(currentChunk)) {
+                if (cordInsideRect(rectStart, height, width, currentEntity->selfPosition))
+                    result.first.push_back(currentEntity);
+            }
+        }
+
+        if (getItems) {
+            for (const auto &currentItem : itemsInChunks.at(currentChunk)) {
+                if (cordInsideRect(rectStart, height, width, currentItem->selfPosition))
+                    result.second.push_back(currentItem);
+            }
         }
     }
 
     return result;
 }
 
-// Returns a vector containing pointers to any entities found in the given circle.
-std::vector<Entity *> World::getEntitiesInCircle(Coordinate circleCenter, uint radius) {
-    std::vector<Entity *> result;
+// Returns vectors containing pointers to any entities and/or items found in the given circle.
+std::pair<std::vector<Entity *>, std::vector<Item *>>
+World::getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities, bool getItems) {
+    std::pair<std::vector<Entity *>, std::vector<Item *>> result;
 
-    uint rectSideLength = (radius * 2) + 1;
+    const uint rectSideLength = (radius * 2) + 1;
     Coordinate rectEquivalent = Coordinate{circleCenter.x - radius, circleCenter.y - radius};
 
     if (circleCenter.x < radius)
@@ -479,11 +515,23 @@ std::vector<Entity *> World::getEntitiesInCircle(Coordinate circleCenter, uint r
     if (circleCenter.y < radius)
         rectEquivalent.y = 0;
 
-    std::vector<Entity *> tmpVec = getEntitiesInRect(rectEquivalent, rectSideLength, rectSideLength);
+    const std::pair<std::vector<Entity *>, std::vector<Item *>> tmpVec = getObjectsInRect(rectEquivalent,
+                                                                                          rectSideLength,
+                                                                                          rectSideLength, getEntities,
+                                                                                          getItems);
 
-    for (const auto &it : tmpVec) {
-        if ((uint) ceil(distance(circleCenter, it->selfPosition) <= radius))
-            result.push_back(it);
+    if (getEntities) {
+        for (const auto &it : tmpVec.first) {
+            if ((uint) ceil(distance(circleCenter, it->selfPosition) <= radius))
+                result.first.push_back(it);
+        }
+    }
+
+    if (getItems) {
+        for (const auto &it : tmpVec.second) {
+            if ((uint) ceil(distance(circleCenter, it->selfPosition) <= radius))
+                result.second.push_back(it);
+        }
     }
 
     return result;
@@ -506,22 +554,6 @@ bool World::addItem(Item *itemPtr, Coordinate cord, bool wasPreviouslyAdded) {
     itemsInChunks.at(this->getChunkNumberForCoordinate(cord)).push_back(itemPtr);
 
     return true;
-}
-
-// Returns the items at the given coordinate.
-std::vector<Item *> World::getItemsAtPos(Coordinate cord) {
-    // If the given coordinate is outside the bounds of the world, return false.
-    if (cordOutsideBound(this->maxCord(), cord))
-        return std::vector<Item *>{};
-
-    std::vector<Item *> result;
-    uint chunkNumber = this->getChunkNumberForCoordinate(cord);
-    for (auto itmPtr : itemsInChunks.at(chunkNumber))
-        if (itmPtr->selfPosition == cord)
-            result.push_back(itmPtr);
-
-    return result;
-
 }
 
 // Unlinks the indicated item from world so that an entity may possess it. Returns true if successful.

@@ -34,7 +34,7 @@ std::string getResourcePath(const std::string &subDir) {
 std::string getDelimitedContents(const std::string &input, const char DelimitingChar, const uint start) {
     uint delmitCount = 0;
     size_t beginPos = 0, endPos = 0;
-    for (uint i = 0; i < input.size(); i++) {
+    for (size_t i = 0; i < input.size(); i++) {
         if (DelimitingChar == input.at(i)) {
             delmitCount++;
 

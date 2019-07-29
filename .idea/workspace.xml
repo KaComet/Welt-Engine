@@ -13,15 +13,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="543775b9-ed09-4949-87ea-eaed7fcbace0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/verbosek.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resource/colorset_default.txt" beforeDir="false" afterPath="$PROJECT_DIR$/resource/colorset_default.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resource/spritedefinitions_default.txt" beforeDir="false" afterPath="$PROJECT_DIR$/resource/spritedefinitions_default.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DisplayIDdef.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/DisplayIDdef.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Item.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Item.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Item.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/Item.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/universal.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/universal.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ColorList.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/ColorList.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Iworld.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/Iworld.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/LTexture.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/LTexture.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/LTexture.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/LTexture.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Sheep.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Sheep.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SpriteSet.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/SpriteSet.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SpriteSet.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/SpriteSet.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Wolf.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Wolf.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/entity.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/resource.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/resource.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/world.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/world.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/world.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/world.h" afterDir="false" />
     </list>
@@ -48,6 +50,7 @@
   <component name="MacroExpansionManager">
     <option name="directoryName" value="SNgwWdiA" />
   </component>
+  <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-68" />
     <option name="width" value="810" />
@@ -66,6 +69,7 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="CMakeSettings" />
   </component>
   <component name="RunDashboard">
@@ -115,17 +119,14 @@
       <workItem from="1564343359659" duration="28000" />
       <workItem from="1564343959499" duration="1967000" />
       <workItem from="1564345951119" duration="54000" />
+      <workItem from="1564346298538" duration="21000" />
+      <workItem from="1564352959530" duration="59000" />
+      <workItem from="1564353078088" duration="8000" />
+      <workItem from="1564359396089" duration="879000" />
+      <workItem from="1564429324578" duration="42000" />
+      <workItem from="1564429377018" duration="4681000" />
     </task>
     <servers />
-  </component>
-  <component name="TodoView">
-    <todo-panel id="selected-file">
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
-    <todo-panel id="all">
-      <are-packages-shown value="true" />
-      <is-autoscroll-to-source value="true" />
-    </todo-panel>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />

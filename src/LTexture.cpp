@@ -105,6 +105,6 @@ void LTexture::setModColor(const SDL_Color &color) {
     SDL_SetTextureColorMod(mTexture, color.r, color.g, color.b);
 }
 
-void LTexture::renderPortion(int x, int y, SDL_Rect *portion, SDL_Rect *renderSection) const {
-    SDL_RenderCopyEx(mRenderer, mTexture, portion, renderSection, 0.00, nullptr, SDL_FLIP_NONE);
+void LTexture::renderPortion(SDL_Rect &portion, SDL_Rect &renderSection) const {
+    SDL_RenderCopyEx(mRenderer, mTexture, &portion, &renderSection, 0.00, nullptr, SDL_FLIP_NONE);
 }

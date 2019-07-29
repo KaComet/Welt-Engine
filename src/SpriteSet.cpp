@@ -52,21 +52,21 @@ void SpriteSet::free() {
 }
 
 // Renders the specified sprite. If the specified sprite is not loaded, the function returns false.
-bool SpriteSet::render(int x, int y, displayID valueToDisplay) const {
+bool SpriteSet::render(unsigned int x, unsigned int y, displayID valueToDisplay) const {
     // If the SpriteSet is not loaded, return false.
     if ((mBitmap == nullptr) || (valueToDisplay >= nTiles))
         return false;
 
     // Calculate the specified tiles position in the SpriteSet.
-    int xPos, yPos, nTilesPerRow;
+    unsigned int xPos, yPos, nTilesPerRow;
     nTilesPerRow = mBitmap->getWidth() / fontWidth;
     xPos = (valueToDisplay % nTilesPerRow) * fontWidth;
     yPos = (valueToDisplay / nTilesPerRow) * fontHeight;
 
     // The portion of the SpriteSet image to render.
     SDL_Rect mask;
-    mask.x = xPos;
-    mask.y = yPos;
+    mask.x = (int) xPos;
+    mask.y = (int) yPos;
     mask.h = fontHeight;
     mask.w = fontWidth;
 
@@ -78,13 +78,13 @@ bool SpriteSet::render(int x, int y, displayID valueToDisplay) const {
     limit.y = y;
 
     // Render the sprite to the screen.
-    mBitmap->renderPortion(x, y, &mask, &limit);
+    mBitmap->renderPortion(mask, limit);
 
     return true;
 }
 
 // Renders the specified sprite in the given color. If the specified sprite is not loaded, the function returns false.
-bool SpriteSet::render(int x, int y, displayID valueToDisplay, SDL_Color renderColor) {
+bool SpriteSet::render(unsigned int x, unsigned int y, displayID valueToDisplay, SDL_Color renderColor) {
     if (!mBitmap)
         return false;
 

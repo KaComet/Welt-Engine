@@ -9,6 +9,7 @@
 #include "Item.h"
 #include <list>
 #include <vector>
+#include <utility>
 #include <cassert>
 #include <algorithm>
 #include <stdexcept>
@@ -40,13 +41,17 @@ public:
 
     bool deleteEntity(OID objectID);
 
-    Entity *getEntityOnTile(Coordinate cord) override;
+    std::pair<Entity *, std::vector<Item *>>
+    getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) override;
 
-    std::vector<Entity *> getEntitiesInLine(Coordinate lineStart, Coordinate lineEnd) override;
+    std::pair<std::vector<Entity *>, std::vector<Item *>>
+    getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntities, bool getItems) override;
 
-    std::vector<Entity *> getEntitiesInRect(Coordinate rectStart, uint height, uint width) override;
+    std::pair<std::vector<Entity *>, std::vector<Item *>>
+    getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getEntities, bool getItems) override;
 
-    std::vector<Entity *> getEntitiesInCircle(Coordinate circleCenter, uint radius) override;
+    std::pair<std::vector<Entity *>, std::vector<Item *>>
+    getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities, bool getItems) override;
 
     // Returns a pointer to a tile at the specified coordinate.
     // Returns nullptr if the Coordinate is out of the bounds of the World.
@@ -60,8 +65,6 @@ public:
     bool setWallMaterial(Coordinate cord, Material desiredMaterial, uint startingHealth) override;
 
     bool addItem(Item *itemPtr, Coordinate cord, bool wasPreviouslyAdded) override;
-
-    std::vector<Item *> getItemsAtPos(Coordinate cord) override;
 
     bool unLinkItem(IID itemToUnlink) override;
 

@@ -13,13 +13,12 @@ EffectedType Wolf::tick(Iworld<Entity, Tile, Item> *worldPointer) {
     if ((worldPointer->getTickNumber() % 3) != 0)
         return EffectedType::NONE;
 
-    std::vector<Entity *> entities = worldPointer->getEntitiesInCircle(selfPosition, 100);
+    std::vector<Entity *> entities = worldPointer->getObjectsInCircle(selfPosition, 100, true, false).first;
     Entity *target = nullptr;
     uint targetDistance = 0;
-    bool attackedSomething = false;
     for (const auto &ent : entities) {
         if ((ent != this) && (ent != nullptr) && (ent->objectType == 1)) {
-            uint entDistance = (uint)ceil(distance(this->selfPosition, ent->selfPosition));
+            uint entDistance = (uint) ceil(distance(this->selfPosition, ent->selfPosition));
             if (target == nullptr) {
                 target = ent;
                 targetDistance = entDistance;

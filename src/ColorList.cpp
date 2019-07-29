@@ -69,7 +69,6 @@ bool ColorList::loadColorsFromFile(const std::string &fileName, const SDL_Color 
                             break;
                         case 1:
                             continue;
-                            break;
                         case 2:
                             if ((tmp.size() != 7) || !stringIsHex(tmp.substr(1, 6))) {
                                 lineLoaded = false;
