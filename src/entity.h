@@ -3,6 +3,7 @@
 
 #include "DisplayIDdef.h"
 #include "universal.h"
+#include "TileMap.h"
 #include "Iworld.h"
 #include "tile.h"
 #include "Item.h"
@@ -13,7 +14,7 @@ public:
 
     virtual ~Entity() = default;
 
-    virtual EffectedType tick(Iworld<Entity, Tile, Item> *worldPointer);
+    virtual EffectedType tick(Iworld<Entity, Tile, Item> *worldPointer, TileMap * map);
 
     virtual EffectedType takeDamage(OID attacker, uint damageAmount, DamageType type);
 

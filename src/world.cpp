@@ -8,14 +8,10 @@ World::World(uint height, uint width) {
 
     // Create the tiles in the World. If enough memory cannot be allocated, throw bad_alloc.
     try {
-        tilesInWorld = new Tile[width * height];
+        map = new TileMap(width, height);
     } catch (std::bad_alloc &bad) {
         throw bad;
     }
-
-    // Save the World's size.
-    worldHeight = height;
-    worldWidth = width;
 
     // Start the OID, IID, and tick counters.
     nextAvailableOID = 0;
@@ -25,21 +21,22 @@ World::World(uint height, uint width) {
 
     // Initialize the entity and item chunks and calculate the max chunk number.
     Coordinate maxChunkCord;
-    uint nChunksPerRow = (uint) std::ceil((double) worldWidth / (double) chunkSize);
-    maxChunkCord.y = worldHeight / chunkSize;
-    maxChunkCord.x = worldWidth / chunkSize;
+    uint nChunksPerRow = (uint) std::ceil((double) width / (double) chunkSize);
+    maxChunkCord.y = height / chunkSize;
+    maxChunkCord.x = width / chunkSize;
     maxChunkNumber = (maxChunkCord.y * nChunksPerRow) + maxChunkCord.x;
     entitiesInChunks.resize(maxChunkNumber + 1);
     itemsInChunks.resize(maxChunkNumber + 1);
 
     assert(chunkSize != 0);
-    assert(worldWidth != 0);
-    assert(worldHeight != 0);
+    assert(width != 0);
+    assert(height != 0);
+    assert(map);
 }
 
 World::~World() {
     // Delete all of the tiles, entities, and items in the World.
-    delete[] tilesInWorld;
+    delete map;
     for (Entity *ent : entitiesInWorld)
         delete ent;
 
@@ -47,91 +44,26 @@ World::~World() {
         delete itm;
 }
 
-// Returns the max coordinate an entity can have.
-Coordinate World::maxCord() {
-    return Coordinate{worldWidth - 1, worldHeight - 1};
+// Returns a pointer to the TileMap used by the world.
+TileMap *World::getMap() {
+    return map;
 }
 
-// Returns the DisplayArrayElement for the indicated tile. If the given position is
-//  outside the world, the function will return a DisplayArrayElement that is loaded
-//  with the values and colors for VOID.
-DisplayArrayElement World::getDisplayInfoForTile(Coordinate cord) {
-    // If the cord is outside the chunk, return air.
-    if (cordOutsideBound(this->maxCord(), cord))
-        return DisplayArrayElement{DCID_VOID, DCID_VOID, M_VOID.color, M_VOID.color};
+void World::loadDisplayArray(DisplayArray &displayArray) {
+    map->loadDisplayArray(displayArray);
 
-    DisplayArrayElement result;
+    for (const auto &entity : entitiesInWorld) {
+        if (!cordOutsideBound(map->maxCord(), entity->selfPosition)) {
+            DisplayArrayElement *tmp = &displayArray.displayData[entity->selfPosition.x +
+                                                                 (entity->selfPosition.y * displayArray.width)];
 
-    Tile *tmp = &tilesInWorld[(cord.y * worldWidth) + cord.x];
-
-    result.BackgroundInfo = tmp->floorDisplay;
-    result.ForegroundInfo = tmp->wallDisplay;
-    result.BackgroundColor = tmp->floorMaterial.color;
-    result.ForegroundColor = tmp->wallMaterial.color;
-
-    //TODO: move to new function to speed up drawing.
-    uint chunkNumber = getChunkNumberForCoordinate(cord);
-    for (const auto &it : itemsInChunks.at(chunkNumber)) {
-        if (it->selfPosition == cord) {
-            result.ForegroundInfo = it->itemDisplay;
-            result.ForegroundColor = it->selfMaterial.color;
-            break;
-        }
-    }
-
-    //TODO: move to new function to speed up drawing,.
-    for (const auto &it : entitiesInChunks.at(chunkNumber)) {
-        if (it->selfPosition == cord) {
-            result.ForegroundInfo = it->entityDisplay;
-            result.ForegroundColor = it->selfMaterial.color;
-            break;
-        }
-    }
-
-    return result;
-}
-
-// Returns a DisplayArray representing everything in the chunk.
-// Don't forget to call delete and nullptr DisplayArrayElement* in the output after use.
-DisplayArray World::getDisplayArrayForWorld() {
-    // Create a DisplayArray and initialize its dimensions.
-    DisplayArray result;
-    result.width = worldWidth;
-    result.height = worldHeight;
-
-    // Create an array of DisplayArrayElement and link it to the result DisplayArray.
-    auto *arrayPtr = new DisplayArrayElement[result.width * result.height];
-    result.displayData = arrayPtr;
-
-    // Load the DisplayArrayElement array with the display info for every tile in the chunk.
-    for (uint r = 0; r < worldWidth; r++) {
-        for (uint c = 0; c < worldWidth; c++) {
-            arrayPtr[c + (worldWidth * r)] = getDisplayInfoForTile(Coordinate{c, r});
-        }
-    }
-
-    return result;
-}
-
-// Don't forget to call delete and nullptr DisplayArrayElement* in the output after use.
-void World::getDisplayArrayForWorld(DisplayArray &dis) {
-    // If the display array is the wrong dimensions or does not exit, delete it and create a new one.
-    if ((dis.height != worldHeight) || (dis.width != worldWidth) || (dis.displayData == nullptr)) {
-        delete[] dis.displayData;
-        dis = this->getDisplayArrayForWorld();
-        return;
-    }
-
-    // Load the DisplayArrayElement array with the display info for every tile in the chunk.
-    for (uint r = 0; r < worldWidth; r++) {
-        for (uint c = 0; c < worldWidth; c++) {
-            dis.displayData[c + (worldWidth * r)] = getDisplayInfoForTile(Coordinate{c, r});
+            tmp->ForegroundInfo = entity->entityDisplay;
+            tmp->ForegroundColor = entity->selfMaterial.color;
         }
     }
 }
 
-// Calls each entity's tick function. The order in which the tick functions are called are determined
-//   by which entities have the highest initiative.
+// Calls each entity's tick function.
 void World::tick() {
     auto it = entitiesInWorld.begin();
 
@@ -146,7 +78,7 @@ void World::tick() {
         }
 
         // Call the entity's tick function and store its returned state.
-        EffectedType returnState = entityPtr->tick(this);
+        EffectedType returnState = entityPtr->tick(this, map);
 
         // If the entity indicated that it needs to be deleted, delete it.
         if (returnState == EffectedType::DELETED) {
@@ -166,7 +98,7 @@ void World::tick() {
 // If the entity does not exist or the cord is outside the World, return false.
 bool World::moveEntity(Entity *entityPtr, Coordinate cord) {
     // If the desired coordinate is outsize the World or the entity pointer is NULL, return false.
-    if (cordOutsideBound(this->maxCord(), cord) || (entityPtr == nullptr))
+    if (cordOutsideBound(map->maxCord(), cord) || (entityPtr == nullptr))
         return false;
 
     // Set the entity to the desired coordinate.
@@ -188,7 +120,7 @@ World::getObjectsOnTile(Coordinate cord, const bool getEntities, const bool getI
     result.first = nullptr;
 
     // If the given coordinate is outside the bounds of the world, return;
-    if (cordOutsideBound(this->maxCord(), cord))
+    if (cordOutsideBound(map->maxCord(), cord))
         return result;
 
     // Find the chunk number for the coordinate.
@@ -222,8 +154,9 @@ World::getObjectsOnTile(Coordinate cord, const bool getEntities, const bool getI
 // Adds the provided entity to the World at the indicated tile. Returns true if successful.
 bool World::addEntity(Entity *entityToAdd, Coordinate cord) {
     // If the desired coordinate is outsize the World or the entity pointer is NULL, return false.
-    if (cordOutsideBound(this->maxCord(), cord) || (entityToAdd == nullptr))
-        return false;
+    if (cordOutsideBound(map->maxCord(), cord) || (entityToAdd == nullptr))
+        if (cordOutsideBound(map->maxCord(), cord) || (entityToAdd == nullptr))
+            return false;
 
     for (const auto &it : entitiesInWorld) {
         // If we have found a entity that is currently occupying the tile we want to add an entity to, return false.
@@ -327,38 +260,15 @@ bool World::deleteEntity(OID objectID) {
     return false;
 }
 
-// Sets the floor material of the specified tile to the given material. Returns true if successful.
-bool World::setFloorMaterial(Coordinate cord, Material desiredMaterial) {
-    if (cordOutsideBound(this->maxCord(), cord))
-        return false;
-
-    tilesInWorld[(cord.y * worldWidth) + cord.x].floorMaterial = desiredMaterial;
-    tilesInWorld[(cord.y * worldWidth) + cord.x].floorDisplay = desiredMaterial.defaultDisplayFloor;
-
-    return true;
-}
-
-// Sets the wall material of the specified tile to the given material. Returns true if successful.
-bool World::setWallMaterial(Coordinate cord, Material desiredMaterial, uint startingHealth) {
-    if (cordOutsideBound(this->maxCord(), cord))
-        return false;
-
-    tilesInWorld[(cord.y * worldWidth) + cord.x].wallMaterial = desiredMaterial;
-    tilesInWorld[(cord.y * worldWidth) + cord.x].wallDisplay = desiredMaterial.defaultDisplayWall;
-    tilesInWorld[(cord.y * worldWidth) + cord.x].wallHealth = startingHealth;
-
-    return true;
-}
-
 // Returns the number of the chunk for the given coordinate.
 uint World::getChunkNumberForCoordinate(const Coordinate &cord) {
     uint nChunksPerRow, chunkNumber;
 
-    nChunksPerRow = worldWidth / chunkSize;
-    if ((worldWidth % chunkSize) > 0)
+    nChunksPerRow = map->width() / chunkSize;
+    if ((map->width() % chunkSize) > 0)
         nChunksPerRow += 1;
 
-    if (cordOutsideBound(this->maxCord(), cord))
+    if (cordOutsideBound(map->maxCord(), cord))
         return maxChunkNumber;
 
     Coordinate chunkCord;
@@ -377,20 +287,20 @@ std::vector<uint> World::getChunksInRect(Coordinate rectStart, uint height, uint
     bool outside = false;
 
     // If the minimum value of the rect is outside the world, return the overflow chunk (the max chunk.)
-    if (cordOutsideBound(this->maxCord(), rectStart)) {
+    if (cordOutsideBound(map->maxCord(), rectStart)) {
         result.push_back(maxChunkNumber);
         return result;
     }
 
     // If the max value of the chunk is outside the bounds of the world, resize it so it
     //   is, and set a flag so the overflow chunk can be included later.
-    if ((rectStart.y + height) > maxCord().y) {
-        height = maxCord().y - rectStart.y + 1;
+    if ((rectStart.y + height) > map->maxCord().y) {
+        height = map->maxCord().y - rectStart.y + 1;
         outside = true;
     }
 
-    if ((rectStart.x + width) > maxCord().x) {
-        width = maxCord().x - rectStart.x + 1;
+    if ((rectStart.x + width) > map->maxCord().x) {
+        width = map->maxCord().x - rectStart.x + 1;
         outside = true;
     }
 
@@ -541,7 +451,7 @@ World::getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities
 bool World::addItem(Item *itemPtr, Coordinate cord, bool wasPreviouslyAdded) {
     // If the item pointer is a null pointer or the desired position is
     //   outside the bounds of the world, return false.
-    if ((!itemPtr) || cordOutsideBound(this->maxCord(), cord))
+    if ((!itemPtr) || cordOutsideBound(map->maxCord(), cord))
         return false;
 
     // Set the IID and the position of the item.
@@ -622,3 +532,4 @@ bool World::deleteItem(IID itemToDelete) {
 
     return false;
 }
+

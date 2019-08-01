@@ -1,8 +1,10 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include "DisplayIDdef.h"
 #include "universal.h"
 #include "material.h"
+#include "TileMap.h"
 #include "Iworld.h"
 #include "entity.h"
 #include "tile.h"
@@ -16,20 +18,16 @@
 
 class World : public Iworld<Entity, Tile, Item> {
 public:
-    World(uint height, uint width); //NU
+    World(uint height, uint width);
+
     ~World() override;
 
-    // World functions
-    Coordinate maxCord() override;
-
-    DisplayArrayElement getDisplayInfoForTile(Coordinate cord) override;
-
-    DisplayArray getDisplayArrayForWorld();
-
-    void getDisplayArrayForWorld(DisplayArray &dis);
+    TileMap *getMap();
 
     // Returns how many ticks have passed since the creation of the world.
     inline uint getTickNumber() override { return tickNumber; }
+
+    void loadDisplayArray(DisplayArray &displayArray);
 
     void tick();
 
@@ -53,17 +51,6 @@ public:
     std::pair<std::vector<Entity *>, std::vector<Item *>>
     getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities, bool getItems) override;
 
-    // Returns a pointer to a tile at the specified coordinate.
-    // Returns nullptr if the Coordinate is out of the bounds of the World.
-    inline Tile *getTileAtPos(Coordinate cccord) override {
-        return (cordOutsideBound(this->maxCord(), cccord)) ? nullptr : &tilesInWorld[cccord.x +
-                                                                                     (cccord.y * worldWidth)];
-    }
-
-    bool setFloorMaterial(Coordinate cord, Material desiredMaterial) override;
-
-    bool setWallMaterial(Coordinate cord, Material desiredMaterial, uint startingHealth) override;
-
     bool addItem(Item *itemPtr, Coordinate cord, bool wasPreviouslyAdded) override;
 
     bool unLinkItem(IID itemToUnlink) override;
@@ -75,8 +62,8 @@ private:
 
     std::vector<uint> getChunksInRect(Coordinate rectStart, uint height, uint width);
 
-    Tile *tilesInWorld;
-    uint worldHeight, worldWidth, tickNumber, chunkSize, maxChunkNumber;
+    TileMap *map;
+    uint tickNumber, chunkSize, maxChunkNumber;
     OID nextAvailableOID;
     OID nextAvailableIID;
     std::list<Entity *> entitiesInWorld;

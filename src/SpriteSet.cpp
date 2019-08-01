@@ -74,8 +74,8 @@ bool SpriteSet::render(unsigned int x, unsigned int y, displayID valueToDisplay)
     SDL_Rect limit;
     limit.h = fontHeight;
     limit.w = fontWidth;
-    limit.x = x;
-    limit.y = y;
+    limit.x = (int)x;
+    limit.y = (int)y;
 
     // Render the sprite to the screen.
     mBitmap->renderPortion(mask, limit);

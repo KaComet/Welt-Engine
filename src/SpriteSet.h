@@ -1,7 +1,3 @@
-//
-// Created by Bot_SpaceCat on 6/22/2019.
-//
-
 #ifndef WELT_P_C_SPRITESET_H
 #define WELT_P_C_SPRITESET_H
 

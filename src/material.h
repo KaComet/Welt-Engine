@@ -18,10 +18,6 @@ struct Material {
     DisplayID defaultDisplayWall, defaultDisplayFloor;
 };
 
-//const DisplayArrayElement DI_AIR           = DisplayArrayElement{DCID_AIR, DCID_AIR, COLOR_AIR, COLOR_AIR};
-//const DisplayArrayElement DI_STONE_WALL    = DisplayArrayElement{DCID_GROUND_OUTSIDE, DCID_SLDWALL_CONNECT, COLOR_STONE, COLOR_STONE};
-//const DisplayArrayElement DI_ENTITY_SIMPLE = DisplayArrayElement{DCID_ENTITY_SIMPLE, DCID_ENTITY_SIMPLE, COLOR_ENTITY_NICE, COLOR_ENTITY_NICE};
-
 const Material M_VOID   = Material{  MaterialType::GAS,     0, COLOR_VOID, DCID_AIR, DCID_AIR  };
 const Material M_AIR    = Material{  MaterialType::GAS,     0, COLOR_AIR, DCID_AIR, DCID_AIR  };
 const Material M_STONE  = Material{  MaterialType::SOLID, 200, COLOR_STONE, DCID_SLDWALL_CONNECT, DCID_GROUND_OUTSIDE  };

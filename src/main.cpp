@@ -43,11 +43,11 @@ SDL_Window *gWindow = nullptr;
 //The window renderer
 SDL_Renderer *gRenderer = nullptr;
 
-void setWorldFloorToMaterial(World &ch, Material m);
+void setWorldFloorToMaterial(TileMap &map, Material m);
 
-void setWorldWallToMaterial(World &ch, Material m, uint h);
+void setWorldWallToMaterial(TileMap &map, Material m, uint h);
 
-void drawLineOfWalls(World &ch, Coordinate start, Coordinate end, Material m, uint health);
+void drawLineOfWalls(TileMap &map, Coordinate start, Coordinate end, Material m, uint health);
 
 bool init();
 
@@ -123,8 +123,8 @@ int main(int argc, char *args[]) {
             // Set the floor material to grass, and the wall material to air.
             Material grassTmp = M_GRASS;
             Material airTmp = M_AIR;
-            setWorldFloorToMaterial(a, grassTmp);
-            setWorldWallToMaterial(a, airTmp, airTmp.baseHealth);
+            setWorldFloorToMaterial(*(a.getMap()), grassTmp);
+            setWorldWallToMaterial(*(a.getMap()), airTmp, airTmp.baseHealth);
 
             // Place the sheep in a rough square around the wolf.
             for (uint i = 0; i < 10; i++)
@@ -168,7 +168,7 @@ int main(int argc, char *args[]) {
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
                 // Load the DisplayArray with the display data for the chunk.
-                a.getDisplayArrayForWorld(dis);
+                a.loadDisplayArray(dis);
 
                 // Draw the background elements to the renderer.
                 for (uint row = 0; row < dis.height; row++) {
@@ -287,24 +287,24 @@ void close() {
 }
 
 // Sets the floor material of all tile in a chunk to the specified material.
-void setWorldFloorToMaterial(World &ch, Material m) {
+void setWorldFloorToMaterial(TileMap &map, Material m) {
     for (uint row = 0; row < WORLD_HEIGHT; row++) {
         for (uint column = 0; column < WORLD_WIDTH; column++) {
-            ch.setFloorMaterial(Coordinate{column, row}, m);
+            map.setFloorMaterial(Coordinate{column, row}, m);
         }
     }
 }
 
 // Sets the wall material of all tile in a chunk to the specified material.
-void setWorldWallToMaterial(World &ch, Material m, uint h) {
+void setWorldWallToMaterial(TileMap &map, Material m, uint h) {
     for (uint row = 0; row < WORLD_HEIGHT; row++) {
         for (uint column = 0; column < WORLD_WIDTH; column++) {
-            ch.setWallMaterial(Coordinate{column, row}, m, h);
+            map.setWallMaterial(Coordinate{column, row}, m, h);
         }
     }
 }
 
-void drawLineOfWalls(World &ch, Coordinate start, Coordinate end, Material m, uint health) {
+void drawLineOfWalls(TileMap &map, Coordinate start, Coordinate end, Material m, uint health) {
     // Bresenham's line algorithm. Adapted from https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
     bool steep = (fabs(end.y - start.y) > fabs(end.x - start.x));
     if (steep) {
@@ -326,7 +326,8 @@ void drawLineOfWalls(World &ch, Coordinate start, Coordinate end, Material m, ui
     for (uint x = start.x; x < end.x; x++) {
         Coordinate currentPos = steep ? Coordinate{y, x} : Coordinate{x, y};
 
-        ch.setWallMaterial(currentPos, m, health);
+        // TODO: FIX
+        map.setWallMaterial(currentPos, m, health);
 
         error -= dy;
         if (error < 0) {

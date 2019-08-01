@@ -10,7 +10,7 @@ Entity::Entity() {
     entityDisplay = 5;
 }
 
-EffectedType Entity::tick(Iworld<Entity, Tile, Item> *worldPointer) {
+EffectedType Entity::tick(Iworld<Entity, Tile, Item> *worldPointer, TileMap * map) {
     return EffectedType::NONE;
 }
 

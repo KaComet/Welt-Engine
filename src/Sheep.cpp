@@ -6,7 +6,7 @@ Sheep::Sheep() {
     selfHealth = 100;
 }
 
-EffectedType Sheep::tick(Iworld<Entity, Tile, Item> *worldPointer) {
+EffectedType Sheep::tick(Iworld<Entity, Tile, Item> *worldPointer, TileMap * map) {
     if (selfHealth == 0)
         return EffectedType::DELETED;
 
@@ -46,7 +46,7 @@ EffectedType Sheep::tick(Iworld<Entity, Tile, Item> *worldPointer) {
         delta.y = 2;
 
     Coordinate nextPos = Coordinate{(selfPosition.x + delta.x) - 1, (selfPosition.y + delta.y) - 1};
-    Tile *nextTile = worldPointer->getTileAtPos(nextPos);
+    Tile *nextTile = map->at(nextPos);
     Entity *nxtPtr = worldPointer->getObjectsOnTile(nextPos, true, false).first;
     if ((nxtPtr != nullptr) || (nextTile == nullptr) || (nextTile->wallMaterial.materialType != MaterialType::GAS))
         return EffectedType::NONE;

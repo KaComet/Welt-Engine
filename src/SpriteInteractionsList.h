@@ -9,7 +9,7 @@
 #include "resource.h"
 #include "DisplayIDdef.h"
 
-// Stores mutible SpriteInteractions for easy use.
+// Stores mutable SpriteInteractions for easy use.
 
 class SpriteInteractionsList {
 public:

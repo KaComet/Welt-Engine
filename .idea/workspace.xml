@@ -13,17 +13,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="543775b9-ed09-4949-87ea-eaed7fcbace0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/TileMap.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/TileMap.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ColorList.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/ColorList.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Iworld.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/Iworld.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/LTexture.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/LTexture.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/LTexture.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/LTexture.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Sheep.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Sheep.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Sheep.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/Sheep.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SpriteInteractionsList.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/SpriteInteractionsList.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SpriteSet.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/SpriteSet.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/SpriteSet.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/SpriteSet.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Wolf.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Wolf.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Wolf.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/Wolf.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/entity.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/resource.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/resource.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/entity.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/entity.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/material.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/material.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/world.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/world.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/world.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/world.h" afterDir="false" />
     </list>
@@ -37,13 +42,6 @@
     <option name="formatViaClangd" value="false" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>chunk</find>
-      <find>delete</find>
-      <find>.c_str()</find>
-    </findStrings>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -51,11 +49,6 @@
     <option name="directoryName" value="SNgwWdiA" />
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-68" />
-    <option name="width" value="810" />
-    <option name="height" value="1000" />
-  </component>
   <component name="ProjectId" id="1Oef0sjSQ9z11Ly74IG5P69kTuw" />
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -69,6 +62,7 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
     <property name="settings.editor.selected.configurable" value="CMakeSettings" />
   </component>
@@ -125,6 +119,15 @@
       <workItem from="1564359396089" duration="879000" />
       <workItem from="1564429324578" duration="42000" />
       <workItem from="1564429377018" duration="4681000" />
+      <workItem from="1564434131440" duration="12000" />
+      <workItem from="1564460726489" duration="157000" />
+      <workItem from="1564511596354" duration="741000" />
+      <workItem from="1564516189018" duration="545000" />
+      <workItem from="1564522474579" duration="742000" />
+      <workItem from="1564527587757" duration="30000" />
+      <workItem from="1564597636677" duration="908000" />
+      <workItem from="1564606984677" duration="21000" />
+      <workItem from="1564612851397" duration="9301000" />
     </task>
     <servers />
   </component>
