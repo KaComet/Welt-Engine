@@ -35,7 +35,7 @@ bool ColorList::loadColorsFromFile(const std::string &fileName, const SDL_Color 
 
             // Load the current line.
             std::getline(inputFile, currentLine);
-            uint delemitCount = std::count(currentLine.begin(), currentLine.end(), ',');
+            long delemitCount = std::count(currentLine.begin(), currentLine.end(), ',');
 
             // If there are not the right number of delmit characters, the line must not be formatted correctly.
             //   If this is the case, skip the current line.
@@ -50,6 +50,7 @@ bool ColorList::loadColorsFromFile(const std::string &fileName, const SDL_Color 
                         case '\n':
                             c = currentLine.erase(c);
                             continue;
+                        default: ;
                     }
                     c++;
                 }
@@ -130,9 +131,9 @@ SDL_Color ColorList::getSDL_ColorFromCSS_Color(const std::string &input, SDL_Col
 
     Uint8 red, blue, green;
     std::string redS, blueS, greenS;
-    red = std::stoi(input.substr(1, 2), nullptr, 16);
-    blue = std::stoi(input.substr(3, 2), nullptr, 16);
-    green = std::stoi(input.substr(5, 2), nullptr, 16);
+    red = static_cast<Uint8>(std::stoi(input.substr(1, 2), nullptr, 16));
+    blue = static_cast<Uint8>(std::stoi(input.substr(3, 2), nullptr, 16));
+    green = static_cast<Uint8>(std::stoi(input.substr(5, 2), nullptr, 16));
 
     return SDL_Color{red, blue, green};
     //#FFBBCC

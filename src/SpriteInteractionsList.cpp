@@ -37,7 +37,7 @@ bool SpriteInteractionsList::loadSpriteInteractionsFromFile(const std::string &f
 
             // Load the current line.
             std::getline(inputFile, currentLine);
-            uint delemitCount = std::count(currentLine.begin(), currentLine.end(), ',');
+            long delemitCount = std::count(currentLine.begin(), currentLine.end(), ',');
 
             // If there are not the right number of delmit characters, the line must not be formatted correctly.
             //   If this is the case, skip the current line.
@@ -52,6 +52,7 @@ bool SpriteInteractionsList::loadSpriteInteractionsFromFile(const std::string &f
                         case '\n':
                             c = currentLine.erase(c);
                             continue;
+                        default: ;
                     }
                     c++;
                 }

@@ -61,7 +61,7 @@ public:
 private:
     uint getChunkNumberForCoordinate(const Coordinate &cord);
 
-    vector<uint> getChunksInRect(Coordinate rectStart, uint height, uint width);
+    vector<uint> getChunksInRect(const Coordinate &rectStart, uint height, uint width);
 
     TileMap *map;
     uint tickNumber, chunkSize, maxChunkNumber;

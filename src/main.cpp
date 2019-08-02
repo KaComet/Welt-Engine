@@ -173,14 +173,14 @@ int main(int argc, char *args[]) {
                 // Draw the background elements to the renderer.
                 for (uint row = 0; row < dis.height; row++) {
                     for (uint col = 0; col < dis.width; col++) {
+                        DisplayArrayElement currentElement = dis.displayData[col + (dis.width * row)];
                         // Draw the background elements.
                         // If the Sprite is not in the SpriteSet or is defined as invalid, print the error sprite. (sprite 0)
-                        if (sprites.getNTiles() <= dis.displayData[col + (dis.width * row)].BackgroundInfo) {
+                        if (sprites.getNTiles() <= currentElement.BackgroundInfo) {
                             sprites.setColor(COLOR_ERROR);
                             sprites.render(col * TILE_WIDTH, row * TILE_HEIGHT, tileI.get(0).dDefault);
                         } else {
-                            SDL_Color backgroundColor = colors.get(
-                                    dis.displayData[col + (dis.width * row)].BackgroundColor);
+                            SDL_Color backgroundColor = colors.get(currentElement.BackgroundColor);
 
                             sprites.setColor(backgroundColor);
                             sprites.render(col * TILE_WIDTH, row * TILE_HEIGHT,
@@ -188,13 +188,12 @@ int main(int argc, char *args[]) {
                         }
 
                         // Draw the foreground elements.
-                        //  If the Sprite is not in the SpriteSet or is defined as invalid, print the error sprite. (sprite 0)
-                        if (sprites.getNTiles() <= dis.displayData[col + (dis.width * row)].ForegroundInfo) {
+                        // If the Sprite is not in the SpriteSet or is defined as invalid, print the error sprite. (sprite 0)
+                        if (sprites.getNTiles() <= currentElement.ForegroundInfo) {
                             sprites.setColor(COLOR_ERROR);
                             sprites.render(col * TILE_WIDTH, row * TILE_HEIGHT, tileI.get(0).dDefault);
                         } else {
-                            SDL_Color foregroundColor = colors.get(
-                                    dis.displayData[col + (dis.width * row)].ForegroundColor);
+                            SDL_Color foregroundColor = colors.get(currentElement.ForegroundColor);
 
                             sprites.setColor(foregroundColor);
                             sprites.render(col * TILE_WIDTH, row * TILE_HEIGHT,
@@ -214,7 +213,7 @@ int main(int argc, char *args[]) {
                 // Tick the chunk.
                 a.tick();
 
-                printf("Tick: %u\n", a.getTickNumber());
+                //printf("Tick: %u\n", a.getTickNumber());
             }
         }
     }
@@ -336,7 +335,7 @@ void drawLineOfWalls(TileMap &map, Coordinate start, Coordinate end, Material m,
 
 bool loadSpriteSetFromFile(SDL_Renderer *renderer, SpriteSet &spriteSet, const std::string &fileName) {
     // Check if all the provided pointers are valid. If not, return false.
-    if ((renderer == nullptr) || fileName.empty())
+    if (!renderer || fileName.empty())
         return false;
 
     const std::string path = getResourcePath("tileset") + fileName;
