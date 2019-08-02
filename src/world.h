@@ -16,7 +16,9 @@
 #include <algorithm>
 #include <stdexcept>
 
-class World : public Iworld<Entity, Tile, Item> {
+using namespace std;
+
+class World : public Iworld<Entity, Item> {
 public:
     World(uint height, uint width);
 
@@ -31,24 +33,23 @@ public:
 
     void tick();
 
-    bool moveEntity(Entity *entityPtr, Coordinate cord) override;
+    bool moveEntity(const ObjectAndPosition<Entity> &entityData, Coordinate desiredPosition) override;
 
     bool addEntity(Entity *entityToAdd, Coordinate cord) override;
 
-    bool deleteEntity(std::list<Entity *>::iterator *it);
+    bool deleteEntity(list<ObjectAndPosition<Entity>>::iterator *it);
 
     bool deleteEntity(OID objectID);
 
-    std::pair<Entity *, std::vector<Item *>>
-    getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) override;
+    SearchResult<Entity, Item> getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) override;
 
-    std::pair<std::vector<Entity *>, std::vector<Item *>>
+    SearchResult<Entity, Item>
     getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntities, bool getItems) override;
 
-    std::pair<std::vector<Entity *>, std::vector<Item *>>
+    SearchResult<Entity, Item>
     getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getEntities, bool getItems) override;
 
-    std::pair<std::vector<Entity *>, std::vector<Item *>>
+    SearchResult<Entity, Item>
     getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities, bool getItems) override;
 
     bool addItem(Item *itemPtr, Coordinate cord, bool wasPreviouslyAdded) override;
@@ -60,16 +61,16 @@ public:
 private:
     uint getChunkNumberForCoordinate(const Coordinate &cord);
 
-    std::vector<uint> getChunksInRect(Coordinate rectStart, uint height, uint width);
+    vector<uint> getChunksInRect(Coordinate rectStart, uint height, uint width);
 
     TileMap *map;
     uint tickNumber, chunkSize, maxChunkNumber;
     OID nextAvailableOID;
     OID nextAvailableIID;
-    std::list<Entity *> entitiesInWorld;
-    std::vector<std::list<Entity *>> entitiesInChunks;
-    std::list<Item *> itemsInWorld;
-    std::vector<std::list<Item *>> itemsInChunks;
+    list<ObjectAndPosition<Entity>> entitiesInWorld;
+    vector<list<ObjectAndPosition<Entity> *>> entitiesInChunks;
+    list<ObjectAndPosition<Item>> itemsInWorld;
+    vector<list<ObjectAndPosition<Item> *>> itemsInChunks;
 };
 
 #endif

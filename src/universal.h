@@ -32,11 +32,9 @@ const colorID COLOR_ITEM_TEST_1 = 7;
 
 // ---------------- Structs ----------------
 struct Coordinate {
-    Coordinate() : x(0), y(0) {
+    Coordinate(uint x = 0, uint y = 0) : x(x), y(y) {
     };
 
-    Coordinate(uint xCord, uint yCord) : x(xCord), y(yCord) {
-    };
     uint x;
     uint y;
 };

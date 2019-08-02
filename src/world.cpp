@@ -4,12 +4,12 @@
 World::World(uint height, uint width) {
     // Make sure the World has valid dimensions. If something is wrong, throw invalid_argument.
     if ((height == 0) || (width == 0))
-        throw std::invalid_argument("Cannot create a World with any dimension that is zero");
+        throw invalid_argument("Cannot create a World with any dimension that is zero");
 
     // Create the tiles in the World. If enough memory cannot be allocated, throw bad_alloc.
     try {
-        map = new TileMap(width, height);
-    } catch (std::bad_alloc &bad) {
+        map = new TileMap(height, width);
+    } catch (bad_alloc &bad) {
         throw bad;
     }
 
@@ -21,7 +21,7 @@ World::World(uint height, uint width) {
 
     // Initialize the entity and item chunks and calculate the max chunk number.
     Coordinate maxChunkCord;
-    uint nChunksPerRow = (uint) std::ceil((double) width / (double) chunkSize);
+    uint nChunksPerRow = (uint) ceil((double) width / (double) chunkSize);
     maxChunkCord.y = height / chunkSize;
     maxChunkCord.x = width / chunkSize;
     maxChunkNumber = (maxChunkCord.y * nChunksPerRow) + maxChunkCord.x;
@@ -37,11 +37,11 @@ World::World(uint height, uint width) {
 World::~World() {
     // Delete all of the tiles, entities, and items in the World.
     delete map;
-    for (Entity *ent : entitiesInWorld)
-        delete ent;
+    for (ObjectAndPosition<Entity> entityData : entitiesInWorld)
+        delete entityData.pointer;
 
-    for (Item *itm : itemsInWorld)
-        delete itm;
+    for (ObjectAndPosition<Item> itemData : itemsInWorld)
+        delete itemData.pointer;
 }
 
 // Returns a pointer to the TileMap used by the world.
@@ -49,16 +49,17 @@ TileMap *World::getMap() {
     return map;
 }
 
+// Loads a preexisting display array with all the data needed to display the world.
 void World::loadDisplayArray(DisplayArray &displayArray) {
     map->loadDisplayArray(displayArray);
 
-    for (const auto &entity : entitiesInWorld) {
-        if (!cordOutsideBound(map->maxCord(), entity->selfPosition)) {
-            DisplayArrayElement *tmp = &displayArray.displayData[entity->selfPosition.x +
-                                                                 (entity->selfPosition.y * displayArray.width)];
+    for (const auto &entityData : entitiesInWorld) {
+        if (!cordOutsideBound(map->maxCord(), entityData.position)) {
+            DisplayArrayElement *tmp = &displayArray.displayData[entityData.position.x +
+                                                                 (entityData.position.y * displayArray.width)];
 
-            tmp->ForegroundInfo = entity->entityDisplay;
-            tmp->ForegroundColor = entity->selfMaterial.color;
+            tmp->ForegroundInfo = entityData.pointer->entityDisplay;
+            tmp->ForegroundColor = entityData.pointer->selfMaterial.color;
         }
     }
 }
@@ -69,16 +70,16 @@ void World::tick() {
 
     // Iterate through the list, executing every entity's tick function.
     while (it != entitiesInWorld.end()) {
-        Entity *entityPtr = *it;
+        Entity *entityPtr = (*it).pointer;
 
         // If the entity* is null, skip this element.
-        if (entityPtr == nullptr) {
+        if (!entityPtr) {
             ++it;
             continue;
         }
 
         // Call the entity's tick function and store its returned state.
-        EffectedType returnState = entityPtr->tick(this, map);
+        EffectedType returnState = entityPtr->tick(this, map, *it);
 
         // If the entity indicated that it needs to be deleted, delete it.
         if (returnState == EffectedType::DELETED) {
@@ -96,28 +97,59 @@ void World::tick() {
 
 // Moves an entity from one position to another. Returns true is successful.
 // If the entity does not exist or the cord is outside the World, return false.
-bool World::moveEntity(Entity *entityPtr, Coordinate cord) {
+bool World::moveEntity(const ObjectAndPosition<Entity> &entityData, Coordinate desiredPosition) {
     // If the desired coordinate is outsize the World or the entity pointer is NULL, return false.
-    if (cordOutsideBound(map->maxCord(), cord) || (entityPtr == nullptr))
+    if (cordOutsideBound(map->maxCord(), desiredPosition) || !entityData.pointer)
         return false;
 
-    // Set the entity to the desired coordinate.
-    uint newChunkNumber = getChunkNumberForCoordinate(cord);
-    uint oldChunkNumber = getChunkNumberForCoordinate(entityPtr->selfPosition);
-    if (newChunkNumber != oldChunkNumber) {
-        entitiesInChunks.at(oldChunkNumber).remove(entityPtr);
-        entitiesInChunks.at(newChunkNumber).push_back(entityPtr);
-    }
-    entityPtr->selfPosition = cord;
+    bool state = false;
 
-    return true;
+    // Calculate what chunk the new and old positions are in.
+    uint newChunkNumber = getChunkNumberForCoordinate(desiredPosition);
+    uint oldChunkNumber = getChunkNumberForCoordinate(entityData.position);
+
+    // If the new position is not in the same chunk as the old position, we need to do some more work.
+    if (newChunkNumber != oldChunkNumber) {
+        // Create a variable to store the original reference (the reference to the entity in the old chunk)
+        //   if we find it.
+        ObjectAndPosition<Entity> *originalReference = nullptr;
+
+        // Scan through every entity in the chunk.
+        for (auto it = entitiesInChunks.at(oldChunkNumber).begin(); it != entitiesInChunks.at(oldChunkNumber).end(); it++) {
+            // If we have found the entity reference in the old chunk, store it, remove
+            //   it from the old chunk, and set state to true.
+            if (**it == entityData) {
+                originalReference = *it;
+                entitiesInChunks.at(oldChunkNumber).erase(it);
+                state = true;
+                break;
+            }
+        }
+
+        // If the old reference was found and is valid, add the reference to the new chunk and set its position.
+        if (state && originalReference) {
+            originalReference->position = desiredPosition;
+            entitiesInChunks.at(newChunkNumber).push_back(originalReference);
+        }
+    } else {
+        // If the new position is in the same chunk as the old position, find
+        //   the reference and set the entity's position
+        for (auto & it : entitiesInChunks.at(newChunkNumber)) {
+            if (*it == entityData) {
+                it->position = desiredPosition;
+                state = true;
+                break;
+            }
+        }
+    }
+
+    // Return state. (true if movement was successful.)
+    return state;
 }
 
 // Returns the entity and/or the items at the given tile.
-std::pair<Entity *, std::vector<Item *>>
-World::getObjectsOnTile(Coordinate cord, const bool getEntities, const bool getItems) {
-    std::pair<Entity *, std::vector<Item *>> result;
-    result.first = nullptr;
+SearchResult<Entity, Item> World::getObjectsOnTile(Coordinate cord, const bool getEntities, const bool getItems) {
+    SearchResult<Entity, Item> result;
 
     // If the given coordinate is outside the bounds of the world, return;
     if (cordOutsideBound(map->maxCord(), cord))
@@ -132,8 +164,9 @@ World::getObjectsOnTile(Coordinate cord, const bool getEntities, const bool getI
         auto chunkIt = entitiesInChunks.at(chunkNumber).begin();
 
         while (chunkIt != entitiesInChunks.at(chunkNumber).end()) {
-            if ((*chunkIt)->selfPosition == cord) {
-                result.first = *chunkIt;
+            if ((*chunkIt)->position == cord) {
+                result.entitiesFound.push_back(*chunkIt);
+                break;
             }
 
             chunkIt++;
@@ -144,8 +177,8 @@ World::getObjectsOnTile(Coordinate cord, const bool getEntities, const bool getI
     //   chunk, looking for items that are on the specified tile.
     if (getItems) {
         for (auto itmPtr : itemsInChunks.at(chunkNumber))
-            if (itmPtr->selfPosition == cord)
-                result.second.push_back(itmPtr);
+            if (itmPtr->position == cord)
+                result.itemsFound.push_back(itmPtr);
     }
 
     return result;
@@ -154,21 +187,20 @@ World::getObjectsOnTile(Coordinate cord, const bool getEntities, const bool getI
 // Adds the provided entity to the World at the indicated tile. Returns true if successful.
 bool World::addEntity(Entity *entityToAdd, Coordinate cord) {
     // If the desired coordinate is outsize the World or the entity pointer is NULL, return false.
-    if (cordOutsideBound(map->maxCord(), cord) || (entityToAdd == nullptr))
-        if (cordOutsideBound(map->maxCord(), cord) || (entityToAdd == nullptr))
-            return false;
+    if (cordOutsideBound(map->maxCord(), cord) || !entityToAdd)
+        return false;
 
     for (const auto &it : entitiesInWorld) {
         // If we have found a entity that is currently occupying the tile we want to add an entity to, return false.
-        if (it->selfPosition == cord)
+        if (it.position == cord)
             return false;
     }
 
     // Set the entity's position and OID and add it to the World.
-    entityToAdd->selfPosition = cord;
+    ObjectAndPosition<Entity> entityData = ObjectAndPosition<Entity>{entityToAdd, cord};
     entityToAdd->selfID = nextAvailableOID;
-    entitiesInWorld.push_back(entityToAdd);
-    entitiesInChunks.at(getChunkNumberForCoordinate(cord)).push_back(entityToAdd);
+    entitiesInWorld.push_back(entityData);
+    entitiesInChunks.at(getChunkNumberForCoordinate(cord)).push_back(&entitiesInWorld.back());
 
     // Increment the OID counter
     nextAvailableOID++;
@@ -177,7 +209,7 @@ bool World::addEntity(Entity *entityToAdd, Coordinate cord) {
 }
 
 // Deletes an entity from the world based on it's pointer. Returns true if the entity was found and deleted.
-bool World::deleteEntity(std::list<Entity *>::iterator *it) {
+bool World::deleteEntity(list<ObjectAndPosition<Entity>>::iterator *it) {
     auto globalIt = entitiesInWorld.begin();
     bool foundInGlobal = false;
 
@@ -193,12 +225,12 @@ bool World::deleteEntity(std::list<Entity *>::iterator *it) {
     if (!foundInGlobal)
         return false;
 
-    uint chunkNumber = getChunkNumberForCoordinate((**it)->selfPosition);
+    uint chunkNumber = getChunkNumberForCoordinate((**it).position);
     auto chunkIt = entitiesInChunks.at(chunkNumber).begin();
     bool foundInChunk = false;
 
     while (chunkIt != entitiesInChunks.at(chunkNumber).end()) {
-        if (*chunkIt == **it) {
+        if (**chunkIt == **it) {
             foundInChunk = true;
             break;
         }
@@ -207,7 +239,7 @@ bool World::deleteEntity(std::list<Entity *>::iterator *it) {
     }
 
     if (foundInChunk && foundInGlobal) {
-        delete **it;
+        delete (**it).pointer;
         *it = entitiesInWorld.erase(*it);
         entitiesInChunks.at(chunkNumber).erase(chunkIt);
 
@@ -224,7 +256,7 @@ bool World::deleteEntity(OID objectID) {
     bool foundInGlobal = false;
 
     while (globalIt != entitiesInWorld.end()) {
-        if ((*globalIt)->selfID == objectID) {
+        if ((*globalIt).pointer->selfID == objectID) {
             foundInGlobal = true;
             break;
         }
@@ -235,12 +267,12 @@ bool World::deleteEntity(OID objectID) {
     if (!foundInGlobal)
         return false;
 
-    uint chunkNumber = getChunkNumberForCoordinate((*globalIt)->selfPosition);
+    uint chunkNumber = getChunkNumberForCoordinate((*globalIt).position);
     auto chunkIt = entitiesInChunks.at(chunkNumber).begin();
     bool foundInChunk = false;
 
     while (chunkIt != entitiesInChunks.at(chunkNumber).end()) {
-        if ((*chunkIt)->selfID == objectID) {
+        if ((*chunkIt)->pointer->selfID == objectID) {
             foundInChunk = true;
             break;
         }
@@ -249,7 +281,7 @@ bool World::deleteEntity(OID objectID) {
     }
 
     if (foundInChunk && foundInGlobal) {
-        delete *globalIt;
+        delete (*globalIt).pointer;
         entitiesInWorld.erase(globalIt);
         entitiesInChunks.at(chunkNumber).erase(chunkIt);
 
@@ -282,8 +314,8 @@ uint World::getChunkNumberForCoordinate(const Coordinate &cord) {
 }
 
 // Returns a vector of the numbers of the chunks in a given rectangle.
-std::vector<uint> World::getChunksInRect(Coordinate rectStart, uint height, uint width) {
-    std::vector<uint> result;
+vector<uint> World::getChunksInRect(Coordinate rectStart, uint height, uint width) {
+    vector<uint> result;
     bool outside = false;
 
     // If the minimum value of the rect is outside the world, return the overflow chunk (the max chunk.)
@@ -308,7 +340,7 @@ std::vector<uint> World::getChunksInRect(Coordinate rectStart, uint height, uint
     Coordinate chunkEnd = Coordinate{rectEnd.x / chunkSize, rectEnd.y / chunkSize};
     Coordinate chunkStart = Coordinate{rectStart.x / chunkSize, rectStart.y / chunkSize};
 
-    std::vector<Coordinate> chunkCordsInRect;
+    vector<Coordinate> chunkCordsInRect;
 
     while (chunkStart.x != (chunkEnd.x + 1)) {
         for (Coordinate tmpCord = chunkStart; tmpCord.y != (chunkEnd.y + 1); tmpCord.y += 1) {
@@ -336,21 +368,21 @@ std::vector<uint> World::getChunksInRect(Coordinate rectStart, uint height, uint
     return result;
 }
 
-// Note: the order of the entities in the returned vector is not in any specific order.
-std::pair<std::vector<Entity *>, std::vector<Item *>>
+// Note: the order of the entities in the returned vector are not in any specific order.
+SearchResult<Entity, Item>
 World::getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntities, bool getItems) {
-    std::pair<std::vector<Entity *>, std::vector<Item *>> result;
+    SearchResult<Entity, Item> result;
 
     // Bresenham's line algorithm. Adapted from https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
     bool steep = (fabs(lineEnd.y - lineStart.y) > fabs(lineEnd.x - lineStart.x));
     if (steep) {
-        std::swap(lineStart.x, lineStart.y);
-        std::swap(lineEnd.x, lineEnd.y);
+        swap(lineStart.x, lineStart.y);
+        swap(lineEnd.x, lineEnd.y);
     }
 
     if (lineStart.x > lineEnd.x) {
-        std::swap(lineStart.x, lineEnd.x);
-        std::swap(lineStart.y, lineEnd.y);
+        swap(lineStart.x, lineEnd.x);
+        swap(lineStart.y, lineEnd.y);
     }
 
     const double dx = lineEnd.x - lineStart.x;
@@ -364,11 +396,13 @@ World::getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntiti
 
         auto tileResult = this->getObjectsOnTile(currentPos, getEntities, getItems);
 
-        if (tileResult.first)
-            result.first.push_back(tileResult.first);
+        if (getEntities && !tileResult.entitiesFound.empty())
+            result.entitiesFound.insert(result.entitiesFound.end(), tileResult.entitiesFound.begin(),
+                                        tileResult.entitiesFound.end());
 
-        if (!tileResult.second.empty())
-            result.second.insert(result.second.end(), tileResult.second.begin(), tileResult.second.end());
+        if (getItems && !tileResult.itemsFound.empty())
+            result.itemsFound.insert(result.itemsFound.end(), tileResult.itemsFound.begin(),
+                                     tileResult.itemsFound.end());
 
         error -= dy;
         if (error < 0) {
@@ -381,29 +415,29 @@ World::getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntiti
 }
 
 // Returns vectors containing pointers to any entities and/or items found in the given rectangle.
-std::pair<std::vector<Entity *>, std::vector<Item *>>
+SearchResult<Entity, Item>
 World::getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getEntities, bool getItems) {
-    std::pair<std::vector<Entity *>, std::vector<Item *>> result;
+    SearchResult<Entity, Item> result;
 
     // If the width and/or the height is zero, return.
     if ((height == 0) || (width == 0))
         return result;
 
     // Find the numbers of the chunks in the rectangle.
-    const std::vector<uint> cChunksInRect = this->getChunksInRect(rectStart, height, width);
+    const vector<uint> cChunksInRect = this->getChunksInRect(rectStart, height, width);
 
     for (const auto &currentChunk : cChunksInRect) {
         if (getEntities) {
             for (const auto &currentEntity : entitiesInChunks.at(currentChunk)) {
-                if (cordInsideRect(rectStart, height, width, currentEntity->selfPosition))
-                    result.first.push_back(currentEntity);
+                if (currentEntity->pointer && cordInsideRect(rectStart, height, width, currentEntity->position))
+                    result.entitiesFound.push_back(currentEntity);
             }
         }
 
         if (getItems) {
             for (const auto &currentItem : itemsInChunks.at(currentChunk)) {
-                if (cordInsideRect(rectStart, height, width, currentItem->selfPosition))
-                    result.second.push_back(currentItem);
+                if (cordInsideRect(rectStart, height, width, currentItem->position))
+                    result.itemsFound.push_back(currentItem);
             }
         }
     }
@@ -412,9 +446,9 @@ World::getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getE
 }
 
 // Returns vectors containing pointers to any entities and/or items found in the given circle.
-std::pair<std::vector<Entity *>, std::vector<Item *>>
+SearchResult<Entity, Item>
 World::getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities, bool getItems) {
-    std::pair<std::vector<Entity *>, std::vector<Item *>> result;
+    SearchResult<Entity, Item> result;
 
     const uint rectSideLength = (radius * 2) + 1;
     Coordinate rectEquivalent = Coordinate{circleCenter.x - radius, circleCenter.y - radius};
@@ -425,22 +459,20 @@ World::getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities
     if (circleCenter.y < radius)
         rectEquivalent.y = 0;
 
-    const std::pair<std::vector<Entity *>, std::vector<Item *>> tmpVec = getObjectsInRect(rectEquivalent,
-                                                                                          rectSideLength,
-                                                                                          rectSideLength, getEntities,
-                                                                                          getItems);
+    const SearchResult<Entity, Item> searchResult = getObjectsInRect(rectEquivalent, rectSideLength, rectSideLength,
+                                                                     getEntities, getItems);
 
     if (getEntities) {
-        for (const auto &it : tmpVec.first) {
-            if ((uint) ceil(distance(circleCenter, it->selfPosition) <= radius))
-                result.first.push_back(it);
+        for (const auto &it : searchResult.entitiesFound) {
+            if ((uint) ceil(distance(circleCenter, it->position) <= radius))
+                result.entitiesFound.push_back(it);
         }
     }
 
     if (getItems) {
-        for (const auto &it : tmpVec.second) {
-            if ((uint) ceil(distance(circleCenter, it->selfPosition) <= radius))
-                result.second.push_back(it);
+        for (const auto &it : searchResult.itemsFound) {
+            if ((uint) ceil(distance(circleCenter, it->position) <= radius))
+                result.itemsFound.push_back(it);
         }
     }
 
@@ -454,14 +486,16 @@ bool World::addItem(Item *itemPtr, Coordinate cord, bool wasPreviouslyAdded) {
     if ((!itemPtr) || cordOutsideBound(map->maxCord(), cord))
         return false;
 
+    ObjectAndPosition<Item> newItem = ObjectAndPosition<Item>{itemPtr, cord};
     // Set the IID and the position of the item.
     if (!wasPreviouslyAdded)
         itemPtr->selfID = nextAvailableIID++;
     itemPtr->selfPosition = cord;
 
     // Add the item to the world and its chunk.
-    itemsInWorld.push_back(itemPtr);
-    itemsInChunks.at(this->getChunkNumberForCoordinate(cord)).push_back(itemPtr);
+    itemsInWorld.push_back(newItem);
+    ObjectAndPosition<Item> *tmpPtr = &itemsInWorld.back();
+    itemsInChunks.at(this->getChunkNumberForCoordinate(cord)).push_back(tmpPtr);
 
     return true;
 }
@@ -475,7 +509,7 @@ bool World::unLinkItem(IID itemToUnlink) {
     bool itemWasFoundInWorld = false;
     auto worldIterator = itemsInWorld.begin();
     while (worldIterator != itemsInWorld.end()) {
-        if ((*worldIterator)->selfID == itemToUnlink) {
+        if ((*worldIterator).pointer->selfID == itemToUnlink) {
             itemWasFoundInWorld = true;
             break;
         }
@@ -485,10 +519,10 @@ bool World::unLinkItem(IID itemToUnlink) {
     if (!itemWasFoundInWorld)
         return false;
 
-    uint chunkNumber = this->getChunkNumberForCoordinate((*worldIterator)->selfPosition);
+    uint chunkNumber = this->getChunkNumberForCoordinate((*worldIterator).position);
     auto chunkIterator = itemsInChunks.at(chunkNumber).begin();
     while (chunkIterator != itemsInChunks.at(chunkNumber).end()) {
-        if ((*chunkIterator)->selfID == itemToUnlink) {
+        if ((*chunkIterator)->pointer->selfID == itemToUnlink) {
             itemsInWorld.erase(worldIterator);
             itemsInChunks.at(chunkNumber).erase(chunkIterator);
             return true;
@@ -506,9 +540,10 @@ bool World::deleteItem(IID itemToDelete) {
         return false;
 
     bool itemWasFoundInWorld = false;
+
     auto worldIterator = itemsInWorld.begin();
     while (worldIterator != itemsInWorld.end()) {
-        if ((*worldIterator)->selfID == itemToDelete) {
+        if ((*worldIterator).pointer->selfID == itemToDelete) {
             itemWasFoundInWorld = true;
             break;
         }
@@ -518,11 +553,11 @@ bool World::deleteItem(IID itemToDelete) {
     if (!itemWasFoundInWorld)
         return false;
 
-    uint chunkNumber = this->getChunkNumberForCoordinate((*worldIterator)->selfPosition);
+    uint chunkNumber = this->getChunkNumberForCoordinate((*worldIterator).position);
     auto chunkIterator = itemsInChunks.at(chunkNumber).begin();
     while (chunkIterator != itemsInChunks.at(chunkNumber).end()) {
-        if ((*chunkIterator)->selfID == itemToDelete) {
-            delete *worldIterator;
+        if ((*chunkIterator)->pointer->selfID == itemToDelete) {
+            delete (*worldIterator).pointer;
             itemsInWorld.erase(worldIterator);
             itemsInChunks.at(chunkNumber).erase(chunkIterator);
             return true;

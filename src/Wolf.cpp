@@ -6,29 +6,32 @@ Wolf::Wolf() {
     objectType = 2;
 }
 
-EffectedType Wolf::tick(Iworld<Entity, Tile, Item> *worldPointer, TileMap * map) {
+EffectedType
+Wolf::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity> &selfReference) {
+
     if (selfHealth == 0)
         return EffectedType::DELETED;
 
     if ((worldPointer->getTickNumber() % 3) != 0)
         return EffectedType::NONE;
 
-    std::vector<Entity *> entities = worldPointer->getObjectsInCircle(selfPosition, 100, true, false).first;
-    Entity *target = nullptr;
+    auto foundEntities = worldPointer->getObjectsInCircle(selfReference.position, 100, true, false).entitiesFound;
+
+    ObjectAndPosition<Entity> *target = nullptr;
     uint targetDistance = 0;
-    for (const auto &ent : entities) {
-        if ((ent != this) && (ent != nullptr) && (ent->objectType == 1)) {
-            uint entDistance = (uint) ceil(distance(this->selfPosition, ent->selfPosition));
+    for (const auto &entPtr : foundEntities) {
+        if ((entPtr->pointer != this) && (entPtr->pointer) && (entPtr->pointer->objectType == 1)) {
+            uint entDistance = (uint) ceil(distance(selfReference.position, entPtr->position));
             if (target == nullptr) {
-                target = ent;
+                target = entPtr;
                 targetDistance = entDistance;
             } else if (entDistance < targetDistance) {
-                target = ent;
+                target = entPtr;
                 targetDistance = entDistance;
             }
 
             if (targetDistance <= 1) {
-                target->takeDamage(selfID, 10, DamageType::KINETIC);
+                target->pointer->takeDamage(selfID, 10, DamageType::KINETIC);
                 return EffectedType::NONE;
             }
         }
@@ -39,22 +42,22 @@ EffectedType Wolf::tick(Iworld<Entity, Tile, Item> *worldPointer, TileMap * map)
     }
 
     Coordinate delta = Coordinate{1, 1};
-    if (target->selfPosition.x > selfPosition.x)
+    if (target->position.x > selfReference.position.x)
         delta.x = 2;
-    else if (target->selfPosition.x < selfPosition.x)
+    else if (target->position.x < selfReference.position.x)
         delta.x = 0;
 
-    if (target->selfPosition.y > selfPosition.y)
+    if (target->position.y > selfReference.position.y)
         delta.y = 2;
-    else if (target->selfPosition.y < selfPosition.y)
+    else if (target->position.y < selfReference.position.y)
         delta.y = 0;
 
-    Coordinate nextPos = Coordinate{(selfPosition.x + delta.x) - 1, (selfPosition.y + delta.y) - 1};
+    Coordinate nextPos = Coordinate{(selfReference.position.x + delta.x) - 1, (selfReference.position.y + delta.y) - 1};
     Tile *nextTile = map->at(nextPos);
     if ((nextTile == nullptr) || (nextTile->wallMaterial.materialType != MaterialType::GAS))
         return EffectedType::NONE;
 
-    bool wasMoved = worldPointer->moveEntity(this, nextPos);
+    bool wasMoved = worldPointer->moveEntity(selfReference, nextPos);
     if (wasMoved)
         return EffectedType::MOVED;
 

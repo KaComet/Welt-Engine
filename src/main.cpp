@@ -173,7 +173,8 @@ int main(int argc, char *args[]) {
                 // Draw the background elements to the renderer.
                 for (uint row = 0; row < dis.height; row++) {
                     for (uint col = 0; col < dis.width; col++) {
-                        //If the Sprite is not in the SpriteSet or is defined as invalid, print the error sprite. (sprite 0)
+                        // Draw the background elements.
+                        // If the Sprite is not in the SpriteSet or is defined as invalid, print the error sprite. (sprite 0)
                         if (sprites.getNTiles() <= dis.displayData[col + (dis.width * row)].BackgroundInfo) {
                             sprites.setColor(COLOR_ERROR);
                             sprites.render(col * TILE_WIDTH, row * TILE_HEIGHT, tileI.get(0).dDefault);
@@ -185,13 +186,9 @@ int main(int argc, char *args[]) {
                             sprites.render(col * TILE_WIDTH, row * TILE_HEIGHT,
                                            tileI.getBackgroundTileFromDisplayArray(col, row, dis));
                         }
-                    }
-                }
 
-                // Draw the foreground elements to the renderer.
-                for (uint row = 0; row < dis.height; row++) {
-                    for (uint col = 0; col < dis.width; col++) {
-                        //If the Sprite is not in the SpriteSet or is defined as invalid, print the error sprite. (sprite 0)
+                        // Draw the foreground elements.
+                        //  If the Sprite is not in the SpriteSet or is defined as invalid, print the error sprite. (sprite 0)
                         if (sprites.getNTiles() <= dis.displayData[col + (dis.width * row)].ForegroundInfo) {
                             sprites.setColor(COLOR_ERROR);
                             sprites.render(col * TILE_WIDTH, row * TILE_HEIGHT, tileI.get(0).dDefault);
@@ -217,7 +214,7 @@ int main(int argc, char *args[]) {
                 // Tick the chunk.
                 a.tick();
 
-                //printf("Tick: %u\n", a.getTickNumber());
+                printf("Tick: %u\n", a.getTickNumber());
             }
         }
     }

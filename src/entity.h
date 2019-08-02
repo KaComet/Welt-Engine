@@ -14,7 +14,8 @@ public:
 
     virtual ~Entity() = default;
 
-    virtual EffectedType tick(Iworld<Entity, Tile, Item> *worldPointer, TileMap * map);
+    virtual EffectedType
+    tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity> &selfReference);
 
     virtual EffectedType takeDamage(OID attacker, uint damageAmount, DamageType type);
 
@@ -23,7 +24,6 @@ public:
     uint selfHealth;
     Material selfMaterial;
     DisplayID entityDisplay;
-    Coordinate selfPosition;      // The position of the entity.
 };
 
 #endif

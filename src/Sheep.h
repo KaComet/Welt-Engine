@@ -9,7 +9,8 @@ class Sheep : public Entity {
 public:
     Sheep();
 
-    EffectedType tick(Iworld<Entity, Tile, Item> *worldPointer, TileMap * map) override;
+    EffectedType tick(Iworld<Entity, Item> *worldPointer, TileMap *map,
+                      const ObjectAndPosition<Entity> &selfReference) override;
 
     EffectedType takeDamage(OID attacker, uint damageAmount, DamageType type) override;
 };
