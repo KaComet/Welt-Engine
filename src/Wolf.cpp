@@ -7,7 +7,7 @@ Wolf::Wolf() {
 }
 
 EffectedType
-Wolf::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity> &selfReference) {
+Wolf::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity, EID> &selfReference) {
 
     if (selfHealth == 0)
         return EffectedType::DELETED;
@@ -17,12 +17,13 @@ Wolf::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosi
 
     auto foundEntities = worldPointer->getObjectsInCircle(selfReference.position, 100, true, false).entitiesFound;
 
-    ObjectAndPosition<Entity> *target = nullptr;
+    ObjectAndPosition<Entity, EID> target;
+    target.pointer = nullptr;
     uint targetDistance = 0;
     for (const auto &entPtr : foundEntities) {
-        if ((entPtr->pointer != this) && (entPtr->pointer) && (entPtr->pointer->objectType == 1)) {
-            uint entDistance = (uint) ceil(distance(selfReference.position, entPtr->position));
-            if (target == nullptr) {
+        if ((entPtr.pointer != this) && (entPtr.pointer) && (entPtr.pointer->objectType == 1)) {
+            uint entDistance = (uint) ceil(distance(selfReference.position, entPtr.position));
+            if (!target.pointer) {
                 target = entPtr;
                 targetDistance = entDistance;
             } else if (entDistance < targetDistance) {
@@ -31,25 +32,25 @@ Wolf::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosi
             }
 
             if (targetDistance <= 1) {
-                target->pointer->takeDamage(selfID, 10, DamageType::KINETIC);
+                target.pointer->takeDamage(selfReference.ID_Number, 10, DamageType::KINETIC);
                 return EffectedType::NONE;
             }
         }
     }
 
-    if (target == nullptr) {
+    if (!target.pointer) {
         return EffectedType::NONE;
     }
 
     Coordinate delta = Coordinate{1, 1};
-    if (target->position.x > selfReference.position.x)
+    if (target.position.x > selfReference.position.x)
         delta.x = 2;
-    else if (target->position.x < selfReference.position.x)
+    else if (target.position.x < selfReference.position.x)
         delta.x = 0;
 
-    if (target->position.y > selfReference.position.y)
+    if (target.position.y > selfReference.position.y)
         delta.y = 2;
-    else if (target->position.y < selfReference.position.y)
+    else if (target.position.y < selfReference.position.y)
         delta.y = 0;
 
     Coordinate nextPos = Coordinate{(selfReference.position.x + delta.x) - 1, (selfReference.position.y + delta.y) - 1};
@@ -64,6 +65,6 @@ Wolf::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosi
     return EffectedType::NONE;
 }
 
-EffectedType Wolf::takeDamage(OID attacker, uint damageAmount, DamageType type) {
+EffectedType Wolf::takeDamage(EID attacker, uint damageAmount, DamageType type) {
     return EffectedType::NONE;
 }

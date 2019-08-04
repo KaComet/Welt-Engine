@@ -10,9 +10,9 @@ public:
     Sheep();
 
     EffectedType tick(Iworld<Entity, Item> *worldPointer, TileMap *map,
-                      const ObjectAndPosition<Entity> &selfReference) override;
+                      const ObjectAndPosition<Entity, EID> &selfReference) override;
 
-    EffectedType takeDamage(OID attacker, uint damageAmount, DamageType type) override;
+    EffectedType takeDamage(EID attacker, uint damageAmount, DamageType type) override;
 };
 
 

@@ -2,7 +2,6 @@
 
 
 Entity::Entity() {
-    selfID = 0;
     objectType = 0;
     selfHealth = 1;
     selfMaterial = M_AIR;
@@ -10,11 +9,11 @@ Entity::Entity() {
 }
 
 EffectedType
-Entity::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity> &selfReference) {
+Entity::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity, EID> &selfReference) {
     return EffectedType::NONE;
 }
 
-EffectedType Entity::takeDamage(OID attacker, uint damageAmount, DamageType type) {
+EffectedType Entity::takeDamage(EID attacker, uint damageAmount, DamageType type) {
     return EffectedType::NONE;
 }
 

@@ -37,10 +37,10 @@ World::World(uint height, uint width) {
 World::~World() {
     // Delete all of the items, entities, and the TileMap.
     delete map;
-    for (ObjectAndPosition<Entity> entityData : entitiesInWorld)
+    for (ObjectAndPosition<Entity, EID> entityData : entitiesInWorld)
         delete entityData.pointer;
 
-    for (ObjectAndPosition<Item> itemData : itemsInWorld)
+    for (ObjectAndPosition<Item, IID> itemData : itemsInWorld)
         delete itemData.pointer;
 }
 
@@ -98,7 +98,7 @@ void World::tick() {
 
 // Moves an entity from one position to another. Returns true is successful.
 // If the entity does not exist or the cord is outside the World, return false.
-bool World::moveEntity(const ObjectAndPosition<Entity> &entityData, Coordinate desiredPosition) {
+bool World::moveEntity(const ObjectAndPosition<Entity, EID> &entityData, Coordinate desiredPosition) {
     // If the desired coordinate is outsize the World or the entity pointer is NULL, return false.
     if (cordOutsideBound(map->maxCord(), desiredPosition) || !entityData.pointer)
         return false;
@@ -110,14 +110,14 @@ bool World::moveEntity(const ObjectAndPosition<Entity> &entityData, Coordinate d
     const uint oldChunkNumber = getChunkNumberForCoordinate(entityData.position);
 
     // Create reference variables to the new and old chunks to simplify later code.
-    list<ObjectAndPosition<Entity> *> &oldChunk = entitiesInChunks.at(oldChunkNumber);
-    list<ObjectAndPosition<Entity> *> &newChunk = entitiesInChunks.at(newChunkNumber);
+    list<ObjectAndPosition<Entity, EID> *> &oldChunk = entitiesInChunks.at(oldChunkNumber);
+    list<ObjectAndPosition<Entity, EID> *> &newChunk = entitiesInChunks.at(newChunkNumber);
 
     // If the new position is not in the same chunk as the old position, we need to do some more work.
     if (newChunkNumber != oldChunkNumber) {
         // Create a variable to store the original reference (the reference to the entity in the old chunk)
         //   if we find it.
-        ObjectAndPosition<Entity> *originalObjectDataReference = nullptr;
+        ObjectAndPosition<Entity, EID> *originalObjectDataReference = nullptr;
 
         // Scan through every entity in the chunk.
         for (auto it = oldChunk.begin(); it != oldChunk.end(); it++) {
@@ -168,7 +168,7 @@ SearchResult<Entity, Item> World::getObjectsOnTile(Coordinate cord, const bool g
     if (getEntities) {
         for (auto &entity : entitiesInChunks.at(chunkNumber)) {
             if (entity->position == cord) {
-                result.entitiesFound.push_back(entity);
+                result.entitiesFound.push_back(*entity);
                 break;
             }
         }
@@ -179,7 +179,7 @@ SearchResult<Entity, Item> World::getObjectsOnTile(Coordinate cord, const bool g
     if (getItems) {
         for (auto &itmPtr : itemsInChunks.at(chunkNumber))
             if (itmPtr->position == cord)
-                result.itemsFound.push_back(itmPtr);
+                result.itemsFound.push_back(*itmPtr);
     }
 
     return result;
@@ -203,8 +203,8 @@ bool World::addEntity(Entity *entityToAdd, Coordinate cord) {
     }
 
     // Set the entity's position and OID and add it to the World.
-    ObjectAndPosition<Entity> entityData = ObjectAndPosition<Entity>{entityToAdd, cord};
-    entityToAdd->selfID = nextAvailableOID;
+    ObjectAndPosition<Entity, EID> entityData = ObjectAndPosition<Entity, EID>{entityToAdd, cord};
+    entityData.ID_Number = nextAvailableOID;
     entitiesInWorld.push_back(entityData);
     entitiesInChunks.at(chunkNumber).push_back(&entitiesInWorld.back());
 
@@ -215,7 +215,7 @@ bool World::addEntity(Entity *entityToAdd, Coordinate cord) {
 }
 
 // Deletes an entity from the world based on it's pointer. Returns true if the entity was found and deleted.
-bool World::deleteEntity(list<ObjectAndPosition<Entity>>::iterator *it) {
+bool World::deleteEntity(list<ObjectAndPosition<Entity, EID>>::iterator *it) {
     auto globalIt = entitiesInWorld.begin();
     bool foundInGlobal = false;
 
@@ -257,12 +257,12 @@ bool World::deleteEntity(list<ObjectAndPosition<Entity>>::iterator *it) {
 }
 
 // Deletes the entity with the specified objectID. Returns true if the entity was found and deleted.
-bool World::deleteEntity(OID objectID) {
+bool World::deleteEntity(EID objectID) {
     auto globalIt = entitiesInWorld.begin();
     bool foundInGlobal = false;
 
     while (globalIt != entitiesInWorld.end()) {
-        if ((*globalIt).pointer->selfID == objectID) {
+        if ((*globalIt).ID_Number == objectID) {
             foundInGlobal = true;
             break;
         }
@@ -278,7 +278,7 @@ bool World::deleteEntity(OID objectID) {
     bool foundInChunk = false;
 
     while (chunkIt != entitiesInChunks.at(chunkNumber).end()) {
-        if ((*chunkIt)->pointer->selfID == objectID) {
+        if ((*chunkIt)->ID_Number == objectID) {
             foundInChunk = true;
             break;
         }
@@ -436,14 +436,14 @@ World::getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getE
         if (getEntities) {
             for (const auto &currentEntity : entitiesInChunks.at(currentChunk)) {
                 if (currentEntity->pointer && cordInsideRect(rectStart, height, width, currentEntity->position))
-                    result.entitiesFound.push_back(currentEntity);
+                    result.entitiesFound.push_back(*currentEntity);
             }
         }
 
         if (getItems) {
             for (const auto &currentItem : itemsInChunks.at(currentChunk)) {
                 if (cordInsideRect(rectStart, height, width, currentItem->position))
-                    result.itemsFound.push_back(currentItem);
+                    result.itemsFound.push_back(*currentItem);
             }
         }
     }
@@ -470,14 +470,14 @@ World::getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities
 
     if (getEntities) {
         for (const auto &it : searchResult.entitiesFound) {
-            if ((uint) ceil(distance(circleCenter, it->position) <= radius))
+            if ((uint) ceil(distance(circleCenter, it.position) <= radius))
                 result.entitiesFound.push_back(it);
         }
     }
 
     if (getItems) {
         for (const auto &it : searchResult.itemsFound) {
-            if ((uint) ceil(distance(circleCenter, it->position) <= radius))
+            if ((uint) ceil(distance(circleCenter, it.position) <= radius))
                 result.itemsFound.push_back(it);
         }
     }
@@ -492,7 +492,7 @@ bool World::addItem(Item *itemPtr, Coordinate cord, bool wasPreviouslyAdded) {
     if ((!itemPtr) || cordOutsideBound(map->maxCord(), cord))
         return false;
 
-    ObjectAndPosition<Item> newItem = ObjectAndPosition<Item>{itemPtr, cord};
+    ObjectAndPosition<Item, IID> newItem = ObjectAndPosition<Item, IID>{itemPtr, cord};
     // Set the IID and the position of the item.
     if (!wasPreviouslyAdded)
         itemPtr->selfID = nextAvailableIID++;
@@ -500,7 +500,7 @@ bool World::addItem(Item *itemPtr, Coordinate cord, bool wasPreviouslyAdded) {
 
     // Add the item to the world and its chunk.
     itemsInWorld.push_back(newItem);
-    ObjectAndPosition<Item> *tmpPtr = &itemsInWorld.back();
+    ObjectAndPosition<Item, IID> *tmpPtr = &itemsInWorld.back();
     itemsInChunks.at(this->getChunkNumberForCoordinate(cord)).push_back(tmpPtr);
 
     return true;

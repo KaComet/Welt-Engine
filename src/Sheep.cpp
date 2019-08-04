@@ -7,7 +7,7 @@ Sheep::Sheep() {
 }
 
 EffectedType
-Sheep::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity> &selfReference) {
+Sheep::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity, EID> &selfReference) {
     if (selfHealth == 0)
         return EffectedType::DELETED;
 
@@ -16,13 +16,14 @@ Sheep::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPos
 
     auto foundEntities = worldPointer->getObjectsInCircle(selfReference.position, 100, true, false).entitiesFound;
 
-    ObjectAndPosition<Entity> *enemyPtr = nullptr;
+    ObjectAndPosition<Entity, EID> enemyPtr;
+    enemyPtr.pointer = nullptr;
     uint enemyDistance = 0;
 
     for (const auto &entPtr : foundEntities) {
-        if ((entPtr->pointer != this) && (entPtr->pointer) && (entPtr->pointer->objectType == 2)) {
-            uint entDistance = (uint) ceil(distance(selfReference.position, entPtr->position));
-            if (enemyPtr == nullptr) {
+        if ((entPtr.pointer != this) && (entPtr.pointer) && (entPtr.pointer->objectType == 2)) {
+            uint entDistance = (uint) ceil(distance(selfReference.position, entPtr.position));
+            if (!enemyPtr.pointer) {
                 enemyPtr = entPtr;
                 enemyDistance = entDistance;
             } else if (entDistance < enemyDistance) {
@@ -32,19 +33,19 @@ Sheep::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPos
         }
     }
 
-    if (enemyPtr == nullptr) {
+    if (!enemyPtr.pointer) {
         return EffectedType::NONE;
     }
 
     Coordinate delta = Coordinate{1, 1};
-    if (enemyPtr->position.x > selfReference.position.x)
+    if (enemyPtr.position.x > selfReference.position.x)
         delta.x = 0;
-    else if (enemyPtr->position.x < selfReference.position.x)
+    else if (enemyPtr.position.x < selfReference.position.x)
         delta.x = 2;
 
-    if (enemyPtr->position.y > selfReference.position.y)
+    if (enemyPtr.position.y > selfReference.position.y)
         delta.y = 0;
-    else if (enemyPtr->position.y < selfReference.position.y)
+    else if (enemyPtr.position.y < selfReference.position.y)
         delta.y = 2;
 
     Coordinate nextPos = Coordinate{(selfReference.position.x + delta.x) - 1, (selfReference.position.y + delta.y) - 1};
@@ -60,7 +61,7 @@ Sheep::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPos
     return EffectedType::NONE;
 }
 
-EffectedType Sheep::takeDamage(OID attacker, uint damageAmount, DamageType type) {
+EffectedType Sheep::takeDamage(EID attacker, uint damageAmount, DamageType type) {
     if (damageAmount >= selfHealth) {
         selfHealth = 0;
         return EffectedType::DELETED;

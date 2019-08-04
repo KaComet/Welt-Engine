@@ -33,13 +33,13 @@ public:
 
     void tick();
 
-    bool moveEntity(const ObjectAndPosition<Entity> &entityData, Coordinate desiredPosition) override;
+    bool moveEntity(const ObjectAndPosition<Entity, EID> &entityData, Coordinate desiredPosition) override;
 
     bool addEntity(Entity *entityToAdd, Coordinate cord) override;
 
-    bool deleteEntity(list<ObjectAndPosition<Entity>>::iterator *it);
+    bool deleteEntity(list<ObjectAndPosition<Entity, EID>>::iterator *it);
 
-    bool deleteEntity(OID objectID);
+    bool deleteEntity(EID objectID);
 
     SearchResult<Entity, Item> getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) override;
 
@@ -65,12 +65,12 @@ private:
 
     TileMap *map;
     uint tickNumber, chunkSize, maxChunkNumber;
-    OID nextAvailableOID;
-    OID nextAvailableIID;
-    list<ObjectAndPosition<Entity>> entitiesInWorld;
-    vector<list<ObjectAndPosition<Entity> *>> entitiesInChunks;
-    list<ObjectAndPosition<Item>> itemsInWorld;
-    vector<list<ObjectAndPosition<Item> *>> itemsInChunks;
+    EID nextAvailableOID;
+    EID nextAvailableIID;
+    list<ObjectAndPosition<Entity, EID>> entitiesInWorld;
+    vector<list<ObjectAndPosition<Entity, EID> *>> entitiesInChunks;
+    list<ObjectAndPosition<Item, EID>> itemsInWorld;
+    vector<list<ObjectAndPosition<Item, EID> *>> itemsInChunks;
 };
 
 #endif

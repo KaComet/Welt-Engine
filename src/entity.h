@@ -15,11 +15,10 @@ public:
     virtual ~Entity() = default;
 
     virtual EffectedType
-    tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity> &selfReference);
+    tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity, EID> &selfReference);
 
-    virtual EffectedType takeDamage(OID attacker, uint damageAmount, DamageType type);
+    virtual EffectedType takeDamage(EID attacker, uint damageAmount, DamageType type);
 
-    OID selfID;            // The ID of the entity.
     uint objectType;       // The type of the object.
     uint selfHealth;
     Material selfMaterial;

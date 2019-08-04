@@ -12,8 +12,8 @@
 typedef unsigned int DisplayID;
 typedef unsigned int colorID;
 typedef unsigned int uint; // Short form for unsigned int.
-typedef unsigned int OID;  // Object ID.
-typedef unsigned int IID;  // Item ID.
+typedef unsigned int EID;  // Entity ID type.
+typedef unsigned int IID;  // Item ID type.
 
 const DisplayID DCID_VOID = 1;
 const DisplayID DCID_AIR = 2;
