@@ -4,10 +4,16 @@ Wolf::Wolf() {
     selfMaterial = M_ENTITY;
     selfMaterial.color = 6;
     objectType = 2;
+    entityDisplay = 5;
+    selfHealth = 100;
+}
+
+Wolf::~Wolf() {
+
 }
 
 EffectedType
-Wolf::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity, EID> &selfReference) {
+Wolf::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndPosition<Ientity, EID> &selfReference) {
 
     if (selfHealth == 0)
         return EffectedType::DELETED;
@@ -17,11 +23,11 @@ Wolf::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosi
 
     auto foundEntities = worldPointer->getObjectsInCircle(selfReference.position, 100, true, false).entitiesFound;
 
-    ObjectAndPosition<Entity, EID> target;
+    ObjectAndPosition<Ientity, EID> target;
     target.pointer = nullptr;
     uint targetDistance = 0;
     for (const auto &entPtr : foundEntities) {
-        if ((entPtr.pointer != this) && (entPtr.pointer) && (entPtr.pointer->objectType == 1)) {
+        if ((entPtr.pointer != this) && (entPtr.pointer) && (entPtr.pointer->getObjectType() == 1)) {
             uint entDistance = (uint) ceil(distance(selfReference.position, entPtr.position));
             if (!target.pointer) {
                 target = entPtr;
@@ -67,4 +73,20 @@ Wolf::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosi
 
 EffectedType Wolf::takeDamage(EID attacker, uint damageAmount, DamageType type) {
     return EffectedType::NONE;
+}
+
+uint Wolf::getHealth() {
+    return selfHealth;
+}
+
+uint Wolf::getObjectType() {
+    return objectType;
+}
+
+Material Wolf::getMaterial() {
+    return selfMaterial;
+}
+
+DisplayID Wolf::getDisplayID() {
+    return entityDisplay;
 }

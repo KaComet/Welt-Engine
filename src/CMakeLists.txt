@@ -2,8 +2,7 @@ add_executable(welt
         world.cpp
         FlatVector.h
         world.h
-        entity.cpp
-        entity.h
+        Ientity.h
         Iworld.h
         main.cpp
         material.h
@@ -26,9 +25,8 @@ add_executable(welt
         resource.h
         SpriteInteractionsList.cpp
         SpriteInteractionsList.h
-        Item.cpp
-        Item.h
+        Iitem.h
         TileMap.cpp
-        TileMap.h)
+        TileMap.h ItemTestStick.cpp ItemTestStick.h)
 
 target_link_libraries(welt ${SDL2_LIBS} ${SDL2_IMAGE_LIBRARIES})

@@ -1,18 +1,35 @@
 #ifndef WELT_P_C_SHEEP_H
 #define WELT_P_C_SHEEP_H
 
-#include "entity.h"
+#include "Ientity.h"
 #include <cmath>
 #include <vector>
 
-class Sheep : public Entity {
+class Sheep : public Ientity {
 public:
     Sheep();
 
-    EffectedType tick(Iworld<Entity, Item> *worldPointer, TileMap *map,
-                      const ObjectAndPosition<Entity, EID> &selfReference) override;
+    ~Sheep() override;
+
+    EffectedType tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
+                      const ObjectAndPosition<Ientity, EID> &selfReference) override;
 
     EffectedType takeDamage(EID attacker, uint damageAmount, DamageType type) override;
+
+    uint getHealth() override;
+
+    uint getObjectType() override;
+
+    Material getMaterial() override;
+
+    DisplayID getDisplayID() override;
+
+private:
+
+    uint objectType;
+    uint selfHealth;
+    Material selfMaterial;
+    DisplayID entityDisplay;
 };
 
 

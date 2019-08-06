@@ -4,10 +4,15 @@ Sheep::Sheep() {
     selfMaterial = M_ENTITY;
     objectType = 1;
     selfHealth = 100;
+    entityDisplay = 5;
+}
+
+Sheep::~Sheep() {
+
 }
 
 EffectedType
-Sheep::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPosition<Entity, EID> &selfReference) {
+Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndPosition<Ientity, EID> &selfReference) {
     if (selfHealth == 0)
         return EffectedType::DELETED;
 
@@ -16,12 +21,12 @@ Sheep::tick(Iworld<Entity, Item> *worldPointer, TileMap *map, const ObjectAndPos
 
     auto foundEntities = worldPointer->getObjectsInCircle(selfReference.position, 100, true, false).entitiesFound;
 
-    ObjectAndPosition<Entity, EID> enemyPtr;
+    ObjectAndPosition<Ientity, EID> enemyPtr;
     enemyPtr.pointer = nullptr;
     uint enemyDistance = 0;
 
     for (const auto &entPtr : foundEntities) {
-        if ((entPtr.pointer != this) && (entPtr.pointer) && (entPtr.pointer->objectType == 2)) {
+        if ((entPtr.pointer != this) && (entPtr.pointer) && (entPtr.pointer->getObjectType() == 2)) {
             uint entDistance = (uint) ceil(distance(selfReference.position, entPtr.position));
             if (!enemyPtr.pointer) {
                 enemyPtr = entPtr;
@@ -70,4 +75,20 @@ EffectedType Sheep::takeDamage(EID attacker, uint damageAmount, DamageType type)
     selfHealth -= damageAmount;
 
     return EffectedType::NONE;
+}
+
+uint Sheep::getHealth() {
+    return selfHealth;
+}
+
+uint Sheep::getObjectType() {
+    return objectType;
+}
+
+Material Sheep::getMaterial() {
+    return selfMaterial;
+}
+
+DisplayID Sheep::getDisplayID() {
+    return entityDisplay;
 }

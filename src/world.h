@@ -6,9 +6,9 @@
 #include "material.h"
 #include "TileMap.h"
 #include "Iworld.h"
-#include "entity.h"
+#include "Ientity.h"
 #include "tile.h"
-#include "Item.h"
+#include "Iitem.h"
 #include <list>
 #include <vector>
 #include <utility>
@@ -18,7 +18,7 @@
 
 using namespace std;
 
-class World : public Iworld<Entity, Item> {
+class World : public Iworld<Ientity, Iitem> {
 public:
     World(uint height, uint width);
 
@@ -33,26 +33,26 @@ public:
 
     void tick();
 
-    bool moveEntity(const ObjectAndPosition<Entity, EID> &entityData, Coordinate desiredPosition) override;
+    bool moveEntity(const ObjectAndPosition<Ientity, EID> &entityData, Coordinate desiredPosition) override;
 
-    bool addEntity(Entity *entityToAdd, Coordinate cord) override;
+    bool addEntity(Ientity *entityToAdd, Coordinate cord) override;
 
-    bool deleteEntity(list<ObjectAndPosition<Entity, EID>>::iterator *it);
+    bool deleteEntity(list<ObjectAndPosition<Ientity, EID>>::iterator *it);
 
     bool deleteEntity(EID objectID);
 
-    SearchResult<Entity, Item> getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) override;
+    SearchResult<Ientity, Iitem> getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) override;
 
-    SearchResult<Entity, Item>
+    SearchResult<Ientity, Iitem>
     getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntities, bool getItems) override;
 
-    SearchResult<Entity, Item>
+    SearchResult<Ientity, Iitem>
     getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getEntities, bool getItems) override;
 
-    SearchResult<Entity, Item>
+    SearchResult<Ientity, Iitem>
     getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities, bool getItems) override;
 
-    bool addItem(Item *itemPtr, Coordinate cord, bool wasPreviouslyAdded) override;
+    bool addItem(Iitem *itemPtr, Coordinate cord, bool wasPreviouslyAdded) override;
 
     bool unLinkItem(IID itemToUnlink) override;
 
@@ -67,10 +67,10 @@ private:
     uint tickNumber, chunkSize, maxChunkNumber;
     EID nextAvailableOID;
     EID nextAvailableIID;
-    list<ObjectAndPosition<Entity, EID>> entitiesInWorld;
-    vector<list<ObjectAndPosition<Entity, EID> *>> entitiesInChunks;
-    list<ObjectAndPosition<Item, EID>> itemsInWorld;
-    vector<list<ObjectAndPosition<Item, EID> *>> itemsInChunks;
+    list<ObjectAndPosition<Ientity, EID>> entitiesInWorld;
+    vector<list<ObjectAndPosition<Ientity, EID> *>> entitiesInChunks;
+    list<ObjectAndPosition<Iitem, IID>> itemsInWorld;
+    vector<list<ObjectAndPosition<Iitem, IID> *>> itemsInChunks;
 };
 
 #endif

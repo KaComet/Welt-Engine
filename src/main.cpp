@@ -2,12 +2,13 @@
 //
 
 #include "world.h"
-#include "Item.h"
+#include "Iitem.h"
 #include "Sheep.h"
 #include "Wolf.h"
 #include "ltimer.h"
 #include "SpriteSet.h"
 #include "ColorList.h"
+#include "ItemTestStick.h"
 #include "SpriteInteractionsList.h"
 #include "material.h"
 #include "universal.h"
@@ -113,7 +114,7 @@ int main(int argc, char *args[]) {
             auto *wolf = new Wolf;
 
             // Create 40 sheep.
-            std::vector<Entity *> theHerd;
+            std::vector<Ientity *> theHerd;
             for (uint i = 0; i < 40; i++)
                 theHerd.push_back(new Sheep);
 
@@ -140,9 +141,7 @@ int main(int argc, char *args[]) {
                 a.addEntity(theHerd.at(i), Coordinate{((WORLD_WIDTH / 2) + 15) + i, (WORLD_HEIGHT / 2) - 10});
 
             // Create a test item and add it to the test world.
-            auto *testItem = new Item;
-            testItem->itemDisplay = DCID_ITEM_TEST_1;
-            testItem->selfMaterial.color = COLOR_ITEM_TEST_1;
+            auto *testItem = new ItemTestStick;
 
             a.addItem(testItem, Coordinate{5, 5}, false);
 
