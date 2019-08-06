@@ -52,9 +52,7 @@ public:
     SearchResult<Ientity, Iitem>
     getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities, bool getItems) override;
 
-    bool addItem(Iitem *itemPtr, Coordinate cord, bool wasPreviouslyAdded) override;
-
-    bool unLinkItem(IID itemToUnlink) override;
+    bool addItem(Iitem *itemPtr, Coordinate cord) override;
 
     bool deleteItem(IID itemToDelete) override;
 

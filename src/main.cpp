@@ -143,7 +143,7 @@ int main(int argc, char *args[]) {
             // Create a test item and add it to the test world.
             auto *testItem = new ItemTestStick;
 
-            a.addItem(testItem, Coordinate{5, 5}, false);
+            a.addItem(testItem, Coordinate{5, 5});
 
             //While application is running
             while (!quit) {

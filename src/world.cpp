@@ -49,20 +49,11 @@ TileMap *World::getMap() {
     return map;
 }
 
-// Loads a preexisting display array with all the data needed to display the world.
+// Loads a preexisting DisplayArray with all the data needed to display the world.
 void World::loadDisplayArray(DisplayArray &displayArray) {
+
+    // Load the DisplayArray with the info for the tiles.
     map->loadDisplayArray(displayArray);
-
-    // Scan through and load all entities' info into the DisplayArray.
-    for (const auto &entityData : entitiesInWorld) {
-        if (!cordOutsideBound(map->maxCord(), entityData.position)) {
-            DisplayArrayElement &tmp = displayArray.displayData[entityData.position.x +
-                                                                 (entityData.position.y * displayArray.width)];
-
-            tmp.ForegroundInfo = entityData.pointer->getDisplayID();
-            tmp.ForegroundColor = entityData.pointer->getMaterial().color;
-        }
-    }
 
     // Scan through and load all items' info into the DisplayArray.
     for (const auto &itemData : itemsInWorld) {
@@ -72,6 +63,17 @@ void World::loadDisplayArray(DisplayArray &displayArray) {
 
             tmp.ForegroundInfo = itemData.pointer->getDisplayID();
             tmp.ForegroundColor = itemData.pointer->getMaterial().color;
+        }
+    }
+
+    // Scan through and load all entities' info into the DisplayArray.
+    for (const auto &entityData : entitiesInWorld) {
+        if (!cordOutsideBound(map->maxCord(), entityData.position)) {
+            DisplayArrayElement &tmp = displayArray.displayData[entityData.position.x +
+                                                                 (entityData.position.y * displayArray.width)];
+
+            tmp.ForegroundInfo = entityData.pointer->getDisplayID();
+            tmp.ForegroundColor = entityData.pointer->getMaterial().color;
         }
     }
 }
@@ -311,9 +313,8 @@ bool World::deleteEntity(EID objectID) {
 
 // Returns the number of the chunk for the given coordinate.
 uint World::getChunkNumberForCoordinate(const Coordinate &cord) {
-    uint nChunksPerRow, chunkNumber;
 
-    nChunksPerRow = map->width() / chunkSize;
+    uint nChunksPerRow = map->width() / chunkSize;
     if ((map->width() % chunkSize) > 0)
         nChunksPerRow += 1;
 
@@ -323,7 +324,7 @@ uint World::getChunkNumberForCoordinate(const Coordinate &cord) {
     Coordinate chunkCord;
     chunkCord.y = cord.y / chunkSize;
     chunkCord.x = cord.x / chunkSize;
-    chunkNumber = (chunkCord.y * nChunksPerRow) + chunkCord.x;
+    const uint chunkNumber = (chunkCord.y * nChunksPerRow) + chunkCord.x;
 
     assert(chunkNumber <= maxChunkNumber);
 
@@ -391,7 +392,7 @@ World::getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntiti
     SearchResult<Ientity, Iitem> result;
 
     // Bresenham's line algorithm. Adapted from https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
-    bool steep = (fabs(lineEnd.y - lineStart.y) > fabs(lineEnd.x - lineStart.x));
+    const bool steep = (fabs(lineEnd.y - lineStart.y) > fabs(lineEnd.x - lineStart.x));
     if (steep) {
         swap(lineStart.x, lineStart.y);
         swap(lineEnd.x, lineEnd.y);
@@ -497,16 +498,16 @@ World::getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities
 }
 
 // Adds an item to the world. Returns true if successful.
-bool World::addItem(Iitem *itemPtr, Coordinate cord, bool wasPreviouslyAdded) {
+bool World::addItem(Iitem *itemPtr, Coordinate cord) {
     // If the item pointer is a null pointer or the desired position is
     //   outside the bounds of the world, return false.
     if ((!itemPtr) || cordOutsideBound(map->maxCord(), cord))
         return false;
 
     ObjectAndPosition<Iitem, IID> newItem = ObjectAndPosition<Iitem, IID>{itemPtr, cord};
+
     // Set the IID and the position of the item.
-    if (!wasPreviouslyAdded)
-        newItem.ID_Number = nextAvailableIID++;
+    newItem.ID_Number = nextAvailableIID++;
     newItem.position = cord;
 
     // Add the item to the world and its chunk.
@@ -515,39 +516,6 @@ bool World::addItem(Iitem *itemPtr, Coordinate cord, bool wasPreviouslyAdded) {
     itemsInChunks.at(this->getChunkNumberForCoordinate(cord)).push_back(tmpPtr);
 
     return true;
-}
-
-// Unlinks the indicated item from world so that an entity may possess it. Returns true if successful.
-bool World::unLinkItem(IID itemToUnlink) {
-    // If the given IID has not been assigned yes, return false;
-    if (itemToUnlink >= nextAvailableIID)
-        return false;
-
-    bool itemWasFoundInWorld = false;
-    auto worldIterator = itemsInWorld.begin();
-    while (worldIterator != itemsInWorld.end()) {
-        if ((*worldIterator).ID_Number == itemToUnlink) {
-            itemWasFoundInWorld = true;
-            break;
-        }
-
-    }
-
-    if (!itemWasFoundInWorld)
-        return false;
-
-    uint chunkNumber = this->getChunkNumberForCoordinate((*worldIterator).position);
-    auto chunkIterator = itemsInChunks.at(chunkNumber).begin();
-    while (chunkIterator != itemsInChunks.at(chunkNumber).end()) {
-        if ((*chunkIterator)->ID_Number == itemToUnlink) {
-            itemsInWorld.erase(worldIterator);
-            itemsInChunks.at(chunkNumber).erase(chunkIterator);
-            return true;
-        }
-
-    }
-
-    return false;
 }
 
 // Deletes a linked item completely from the world. Returns true if successful.

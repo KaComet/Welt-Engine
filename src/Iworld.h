@@ -58,9 +58,7 @@ public:
     virtual SearchResult<EntityType, ItemType>
     getObjectsInCircle(Coordinate circleCenter, uint Radius, bool getEntities, bool getItems) = 0;
 
-    virtual bool addItem(ItemType *itemPtr, Coordinate cord, bool wasPreviouslyAdded) = 0;
-
-    virtual bool unLinkItem(IID itemToUnlink) = 0;
+    virtual bool addItem(ItemType *itemPtr, Coordinate cord) = 0;
 
     virtual bool deleteItem(IID itemToDelete) = 0;
 };
