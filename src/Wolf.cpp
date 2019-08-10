@@ -8,6 +8,10 @@ Wolf::Wolf() {
     selfHealth = 100;
 }
 
+std::vector<std::size_t>Wolf::getEntityTypeHash() {
+    return wolfHash();
+}
+
 EffectedType
 Wolf::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndData<Ientity, EID> &selfReference) {
 
@@ -86,3 +90,8 @@ Material Wolf::getMaterial() {
 DisplayID Wolf::getDisplayID() {
     return entityDisplay;
 }
+
+std::vector<std::size_t> Wolf::wolfHash() {
+    return std::vector<std::size_t>(typeid(this).hash_code());
+}
+

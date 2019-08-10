@@ -12,9 +12,7 @@ public:
 
     virtual ~Iitem() = default;
 
-    virtual std::size_t GetItemTypeHash() = 0;
-
-    virtual std::vector<std::size_t> getComposition() = 0;
+    virtual std::vector<std::size_t> GetItemTypeHash() = 0;
 
     virtual Material getMaterial() = 0;
 

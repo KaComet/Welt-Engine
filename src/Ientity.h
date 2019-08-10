@@ -14,6 +14,8 @@ public:
 
     virtual ~Ientity() = default;
 
+    virtual std::vector<std::size_t> getEntityTypeHash() = 0;
+
     virtual EffectedType
     tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndData<Ientity, EID> &selfReference) = 0;
 

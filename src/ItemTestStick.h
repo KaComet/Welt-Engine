@@ -13,16 +13,16 @@ public:
 
     ~ItemTestStick() override = default;
 
-    std::size_t GetItemTypeHash() override;
+    std::vector<std::size_t> GetItemTypeHash() override;
 
-    std::vector<std::size_t> getComposition() override;
+    Material getMaterial() override;
 
-    Material getMaterial() override ;
+    DisplayID getDisplayID() override;
 
-    DisplayID getDisplayID() override ;
+protected:
+    std::vector<std::size_t> testStickHash();
 
 private:
-
     Material selfMaterial;
     DisplayID itemDisplay;
 };

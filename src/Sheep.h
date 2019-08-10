@@ -11,6 +11,8 @@ public:
 
     ~Sheep() override = default;
 
+    std::vector<std::size_t> getEntityTypeHash() override;
+
     EffectedType tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
                       const ObjectAndData<Ientity, EID> &selfReference) override;
 
@@ -23,6 +25,9 @@ public:
     Material getMaterial() override;
 
     DisplayID getDisplayID() override;
+
+protected:
+    std::vector<std::size_t> sheepHash();
 
 private:
     uint objectType;

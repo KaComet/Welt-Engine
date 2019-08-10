@@ -7,6 +7,10 @@ Sheep::Sheep() {
     entityDisplay = 5;
 }
 
+std::vector<std::size_t> Sheep::getEntityTypeHash() {
+    return sheepHash();
+}
+
 EffectedType
 Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndData<Ientity, EID> &selfReference) {
     if (selfHealth == 0)
@@ -87,3 +91,9 @@ Material Sheep::getMaterial() {
 DisplayID Sheep::getDisplayID() {
     return entityDisplay;
 }
+
+std::vector<std::size_t> Sheep::sheepHash() {
+    return std::vector<std::size_t>(typeid(this).hash_code());
+}
+
+
