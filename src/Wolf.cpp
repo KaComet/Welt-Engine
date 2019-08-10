@@ -8,12 +8,8 @@ Wolf::Wolf() {
     selfHealth = 100;
 }
 
-Wolf::~Wolf() {
-
-}
-
 EffectedType
-Wolf::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndPosition<Ientity, EID> &selfReference) {
+Wolf::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndData<Ientity, EID> &selfReference) {
 
     if (selfHealth == 0)
         return EffectedType::DELETED;
@@ -23,9 +19,9 @@ Wolf::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndPo
 
     auto foundEntities = worldPointer->getObjectsInCircle(selfReference.position, 100, true, false).entitiesFound;
 
-    ObjectAndPosition<Ientity, EID> target;
-    target.pointer = nullptr;
+    ObjectAndData<Ientity, EID> target(nullptr, 0, Coordinate());
     uint targetDistance = 0;
+
     for (const auto &entPtr : foundEntities) {
         if ((entPtr.pointer != this) && (entPtr.pointer) && (entPtr.pointer->getObjectType() == 1)) {
             uint entDistance = (uint) ceil(distance(selfReference.position, entPtr.position));

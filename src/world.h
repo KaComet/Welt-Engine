@@ -33,11 +33,11 @@ public:
 
     void tick();
 
-    bool moveEntity(const ObjectAndPosition<Ientity, EID> &entityData, Coordinate desiredPosition) override;
+    bool moveEntity(const ObjectAndData<Ientity, EID> &entityData, Coordinate desiredPosition) override;
 
     bool addEntity(Ientity *entityToAdd, Coordinate cord) override;
 
-    bool deleteEntity(list<ObjectAndPosition<Ientity, EID>>::iterator *it);
+    bool deleteEntity(list<ObjectAndData<Ientity, EID>>::iterator *it);
 
     bool deleteEntity(EID objectID);
 
@@ -65,10 +65,10 @@ private:
     uint tickNumber, chunkSize, maxChunkNumber;
     EID nextAvailableOID;
     EID nextAvailableIID;
-    list<ObjectAndPosition<Ientity, EID>> entitiesInWorld;
-    vector<list<ObjectAndPosition<Ientity, EID> *>> entitiesInChunks;
-    list<ObjectAndPosition<Iitem, IID>> itemsInWorld;
-    vector<list<ObjectAndPosition<Iitem, IID> *>> itemsInChunks;
+    list<ObjectAndData<Ientity, EID>> entitiesInWorld;
+    vector<list<ObjectAndData<Ientity, EID> *>> entitiesInChunks;
+    list<ObjectAndData<Iitem, IID>> itemsInWorld;
+    vector<list<ObjectAndData<Iitem, IID> *>> itemsInChunks;
 };
 
 #endif

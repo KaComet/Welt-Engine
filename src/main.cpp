@@ -2,7 +2,6 @@
 //
 
 #include "world.h"
-#include "Iitem.h"
 #include "Sheep.h"
 #include "Wolf.h"
 #include "ltimer.h"
@@ -32,16 +31,16 @@ const uint TILE_HEIGHT = 15;
 const uint MAX_SI = 500;
 const uint MAX_COLOR = 500;
 
-//Screen constants
+// Screen constants
 const int SCREEN_FPS = 45;
 const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
 const int SCREEN_WIDTH = TILE_WIDTH * WORLD_WIDTH;
 const int SCREEN_HEIGHT = TILE_HEIGHT * WORLD_HEIGHT;
 
-//The window we'll be rendering to
+// The window we'll be rendering to
 SDL_Window *gWindow = nullptr;
 
-//The window renderer
+// The window renderer
 SDL_Renderer *gRenderer = nullptr;
 
 void setWorldFloorToMaterial(TileMap &map, Material m);
@@ -337,6 +336,7 @@ bool loadSpriteSetFromFile(SDL_Renderer *renderer, SpriteSet &spriteSet, const s
     if (!renderer || fileName.empty())
         return false;
 
+    // Get the path of the SpriteSet and load it.
     const std::string path = getResourcePath("tileset") + fileName;
     const uint NTiles = spriteSet.loadFromFile(renderer, path, TILE_WIDTH, TILE_HEIGHT);
 

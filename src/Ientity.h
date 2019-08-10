@@ -15,7 +15,7 @@ public:
     virtual ~Ientity() = default;
 
     virtual EffectedType
-    tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndPosition<Ientity, EID> &selfReference) = 0;
+    tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndData<Ientity, EID> &selfReference) = 0;
 
     virtual EffectedType takeDamage(EID attacker, uint damageAmount, DamageType type) = 0;
 

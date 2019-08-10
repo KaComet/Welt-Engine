@@ -7,12 +7,8 @@ Sheep::Sheep() {
     entityDisplay = 5;
 }
 
-Sheep::~Sheep() {
-
-}
-
 EffectedType
-Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndPosition<Ientity, EID> &selfReference) {
+Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndData<Ientity, EID> &selfReference) {
     if (selfHealth == 0)
         return EffectedType::DELETED;
 
@@ -21,8 +17,7 @@ Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndP
 
     auto foundEntities = worldPointer->getObjectsInCircle(selfReference.position, 100, true, false).entitiesFound;
 
-    ObjectAndPosition<Ientity, EID> enemyPtr;
-    enemyPtr.pointer = nullptr;
+    ObjectAndData<Ientity, EID> enemyPtr(nullptr, 0, Coordinate());
     uint enemyDistance = 0;
 
     for (const auto &entPtr : foundEntities) {

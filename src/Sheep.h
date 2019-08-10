@@ -9,10 +9,10 @@ class Sheep : public Ientity {
 public:
     Sheep();
 
-    ~Sheep() override;
+    ~Sheep() override = default;
 
     EffectedType tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
-                      const ObjectAndPosition<Ientity, EID> &selfReference) override;
+                      const ObjectAndData<Ientity, EID> &selfReference) override;
 
     EffectedType takeDamage(EID attacker, uint damageAmount, DamageType type) override;
 
@@ -25,7 +25,6 @@ public:
     DisplayID getDisplayID() override;
 
 private:
-
     uint objectType;
     uint selfHealth;
     Material selfMaterial;

@@ -37,10 +37,10 @@ World::World(uint height, uint width) {
 World::~World() {
     // Delete all of the items, entities, and the TileMap.
     delete map;
-    for (ObjectAndPosition<Ientity, EID> entityData : entitiesInWorld)
+    for (ObjectAndData<Ientity, EID> entityData : entitiesInWorld)
         delete entityData.pointer;
 
-    for (ObjectAndPosition<Iitem, IID> itemData : itemsInWorld)
+    for (ObjectAndData<Iitem, IID> itemData : itemsInWorld)
         delete itemData.pointer;
 }
 
@@ -111,7 +111,7 @@ void World::tick() {
 
 // Moves an entity from one position to another. Returns true is successful.
 // If the entity does not exist or the cord is outside the World, return false.
-bool World::moveEntity(const ObjectAndPosition<Ientity, EID> &entityData, Coordinate desiredPosition) {
+bool World::moveEntity(const ObjectAndData<Ientity, EID> &entityData, Coordinate desiredPosition) {
     // If the desired coordinate is outsize the World or the entity pointer is NULL, return false.
     if (cordOutsideBound(map->maxCord(), desiredPosition) || !entityData.pointer)
         return false;
@@ -123,14 +123,14 @@ bool World::moveEntity(const ObjectAndPosition<Ientity, EID> &entityData, Coordi
     const uint oldChunkNumber = getChunkNumberForCoordinate(entityData.position);
 
     // Create reference variables to the new and old chunks to simplify later code.
-    list<ObjectAndPosition<Ientity, EID> *> &oldChunk = entitiesInChunks.at(oldChunkNumber);
-    list<ObjectAndPosition<Ientity, EID> *> &newChunk = entitiesInChunks.at(newChunkNumber);
+    list<ObjectAndData<Ientity, EID> *> &oldChunk = entitiesInChunks.at(oldChunkNumber);
+    list<ObjectAndData<Ientity, EID> *> &newChunk = entitiesInChunks.at(newChunkNumber);
 
     // If the new position is not in the same chunk as the old position, we need to do some more work.
     if (newChunkNumber != oldChunkNumber) {
         // Create a variable to store the original reference (the reference to the entity in the old chunk)
         //   if we find it.
-        ObjectAndPosition<Ientity, EID> *originalObjectDataReference = nullptr;
+        ObjectAndData<Ientity, EID> *originalObjectDataReference = nullptr;
 
         // Scan through every entity in the chunk.
         for (auto it = oldChunk.begin(); it != oldChunk.end(); it++) {
@@ -216,19 +216,15 @@ bool World::addEntity(Ientity *entityToAdd, Coordinate cord) {
     }
 
     // Set the entity's position and OID and add it to the World.
-    ObjectAndPosition<Ientity, EID> entityData = ObjectAndPosition<Ientity, EID>{entityToAdd, cord};
-    entityData.ID_Number = nextAvailableOID;
+    ObjectAndData<Ientity, EID> entityData = ObjectAndData<Ientity, EID>{entityToAdd, nextAvailableOID++, cord};
     entitiesInWorld.push_back(entityData);
     entitiesInChunks.at(chunkNumber).push_back(&entitiesInWorld.back());
-
-    // Increment the OID counter
-    nextAvailableOID++;
 
     return true;
 }
 
 // Deletes an entity from the world based on it's pointer. Returns true if the entity was found and deleted.
-bool World::deleteEntity(list<ObjectAndPosition<Ientity, EID>>::iterator *it) {
+bool World::deleteEntity(list<ObjectAndData<Ientity, EID>>::iterator *it) {
     auto globalIt = entitiesInWorld.begin();
     bool foundInGlobal = false;
 
@@ -504,15 +500,12 @@ bool World::addItem(Iitem *itemPtr, Coordinate cord) {
     if ((!itemPtr) || cordOutsideBound(map->maxCord(), cord))
         return false;
 
-    ObjectAndPosition<Iitem, IID> newItem = ObjectAndPosition<Iitem, IID>{itemPtr, cord};
-
     // Set the IID and the position of the item.
-    newItem.ID_Number = nextAvailableIID++;
-    newItem.position = cord;
+    ObjectAndData<Iitem, IID> newItem = ObjectAndData<Iitem, IID>{itemPtr, nextAvailableIID++, cord};
 
     // Add the item to the world and its chunk.
     itemsInWorld.push_back(newItem);
-    ObjectAndPosition<Iitem, IID> *tmpPtr = &itemsInWorld.back();
+    ObjectAndData<Iitem, IID> *tmpPtr = &itemsInWorld.back();
     itemsInChunks.at(this->getChunkNumberForCoordinate(cord)).push_back(tmpPtr);
 
     return true;
