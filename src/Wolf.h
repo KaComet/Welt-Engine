@@ -14,7 +14,7 @@ public:
     std::vector<std::size_t> getEntityTypeHash() override;
 
     EffectedType tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
-                      const ObjectAndData<Ientity, EID> &selfReference) override;
+                      const ObjectAndData<Ientity, EID> &selfReference, uint energy) override;
 
     EffectedType takeDamage(EID attacker, uint damageAmount, DamageType type) override;
 
@@ -30,8 +30,8 @@ protected:
     std::vector<std::size_t> wolfHash();
 
 private:
-    uint objectType;
-    uint selfHealth;
+    const uint energyNeededForMoveAndAttack = 60;
+    uint objectType, selfHealth, selfEnergy;
     Material selfMaterial;
     DisplayID entityDisplay;
 };

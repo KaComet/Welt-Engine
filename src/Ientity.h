@@ -10,14 +10,15 @@
 
 class Ientity {
 public:
-    Ientity()= default;
+    Ientity() = default;
 
     virtual ~Ientity() = default;
 
     virtual std::vector<std::size_t> getEntityTypeHash() = 0;
 
     virtual EffectedType
-    tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndData<Ientity, EID> &selfReference) = 0;
+    tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndData<Ientity, EID> &selfReference,
+         uint energy) = 0;
 
     virtual EffectedType takeDamage(EID attacker, uint damageAmount, DamageType type) = 0;
 

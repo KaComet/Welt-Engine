@@ -20,7 +20,7 @@ using namespace std;
 
 class World : public Iworld<Ientity, Iitem> {
 public:
-    World(uint height, uint width);
+    World(uint height, uint width, uint energyPerTick);
 
     ~World() override;
 
@@ -28,6 +28,8 @@ public:
 
     // Returns how many ticks have passed since the creation of the world.
     inline uint getTickNumber() override { return tickNumber; }
+
+    uint &energyPerTick() { return givenEnergyPerTick; }
 
     void loadDisplayArray(DisplayArray &displayArray);
 
@@ -62,7 +64,7 @@ private:
     vector<uint> getChunksInRect(const Coordinate &rectStart, uint height, uint width);
 
     TileMap *map;
-    uint tickNumber, chunkSize, maxChunkNumber;
+    uint givenEnergyPerTick, tickNumber, chunkSize, maxChunkNumber;
     EID nextAvailableOID;
     EID nextAvailableIID;
     list<ObjectAndData<Ientity, EID>> entitiesInWorld;

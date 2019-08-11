@@ -44,7 +44,7 @@ Tile *TileMap::at(const Coordinate &coordinate) {
     if (cordOutsideBound(this->_maxCord, coordinate))
         return nullptr;
     else
-        return &tiles[coordinate.x + (coordinate.y * _width)];
+        return &tiles[getArrayIndex(coordinate, _width)];
 }
 
 // Sets the floor material of the specified tile to the given material. Returns true if successful.
@@ -64,7 +64,8 @@ bool TileMap::setFloorMaterial(const Coordinate &coordinate, const Material &des
 }
 
 // Sets the wall material of the specified tile to the given material. Returns true if successful.
-bool TileMap::setWallMaterial(const Coordinate &coordinate, const Material &desiredMaterial, uint startingHealth) noexcept {
+bool
+TileMap::setWallMaterial(const Coordinate &coordinate, const Material &desiredMaterial, uint startingHealth) noexcept {
     // Get the tile at the given coordinate.
     Tile *tile = this->at(coordinate);
 
@@ -72,9 +73,10 @@ bool TileMap::setWallMaterial(const Coordinate &coordinate, const Material &desi
     if (!tile)
         return false;
 
-    // Set the tile's wall material and displayID.
+    // Set the tile's wall material, displayID, and health.
     tile->wallMaterial = desiredMaterial;
     tile->wallDisplay = desiredMaterial.defaultDisplayFloor;
+    tile->wallHealth = desiredMaterial.baseHealth;
 
     return true;
 }
@@ -91,9 +93,10 @@ DisplayArray TileMap::generateDisplayArray() {
     result.displayData = arrayPtr;
 
     // Load the DisplayArrayElement array with the display info for every tile in the chunk.
-    for (uint r = 0; r < result.width; r++) {
-        for (uint c = 0; c < _height; c++) {
-            arrayPtr[c + (result.height * r)] = this->getTileDisplayElement(Coordinate{c, r});
+    Coordinate pos = Coordinate{0, 0};
+    for (pos.y = 0; pos.y < result.width; pos.y++) {
+        for (pos.x = 0; pos.x < result.height; pos.x++) {
+            arrayPtr[getArrayIndex(pos, result.width)] = this->getTileDisplayElement(pos);
         }
     }
 
@@ -103,16 +106,17 @@ DisplayArray TileMap::generateDisplayArray() {
 // Take an already existing DisplayArray and loads it with everything needed to represent the TileMap.
 void TileMap::loadDisplayArray(DisplayArray &displayArray) {
     // If the display array is the wrong dimensions or does not exist, delete it and create a new one.
-    if ((displayArray.height != _height) || (displayArray.width != _width) || (displayArray.displayData == nullptr)) {
+    if ((displayArray.height != _height) || (displayArray.width != _width) || !displayArray.displayData) {
         delete[] displayArray.displayData;
         displayArray = this->generateDisplayArray();
         return;
     }
 
     // Load the DisplayArrayElement array with the display info for every tile in the chunk.
-    for (uint r = 0; r < _width; r++) {
-        for (uint c = 0; c < _height; c++) {
-            displayArray.displayData[c + (_width * r)] = this->getTileDisplayElement(Coordinate{c, r});
+    Coordinate pos = Coordinate{0, 0};
+    for (pos.y = 0; pos.y < displayArray.width; pos.y++) {
+        for (pos.x = 0; pos.x < displayArray.height; pos.x++) {
+            displayArray.displayData[getArrayIndex(pos, displayArray.width)] = this->getTileDisplayElement(pos);
         }
     }
 }

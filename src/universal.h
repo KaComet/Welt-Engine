@@ -52,7 +52,7 @@ enum class DamageType {
 
 // ---------------- Functions ----------------
 
-// If the given coordinate is outside the given bound (defined by its max coordinate,) the funtion returns true.
+// If the given coordinate is outside the given bound (defined by its max coordinate,) the function returns true.
 inline bool cordOutsideBound(const Coordinate &maxCord, const Coordinate &cord) {
     if ((maxCord.x < cord.x) || (maxCord.y < cord.y))
         return true;
@@ -84,6 +84,11 @@ inline double distance(const Coordinate &c1, const Coordinate &c2) {
         return 0;
     else
         return std::sqrt(pow((int) c1.x - (int) c2.x, 2) + pow((int) c1.y - (int) c2.y, 2));
+}
+
+inline uint getArrayIndex(const Coordinate &coordinate, const uint arrayWidth)
+{
+    return coordinate.x + (coordinate.y * arrayWidth);
 }
 
 #endif

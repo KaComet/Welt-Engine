@@ -19,6 +19,7 @@
 
 const uint WORLD_HEIGHT = 50;
 const uint WORLD_WIDTH = 50;
+const uint ENERGY_PER_TICK = 100;
 
 // Sprite, SI, color, and file name constants
 const SpriteInteraction TI_ERROR = SpriteInteraction{"TI_ERROR", 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
@@ -107,7 +108,7 @@ int main(int argc, char *args[]) {
             DisplayArray dis;
 
             // Create a chunk and load it with some test data.
-            World a(WORLD_HEIGHT, WORLD_WIDTH);
+            World a(WORLD_HEIGHT, WORLD_WIDTH, ENERGY_PER_TICK);
 
             // Create a wolf.
             auto *wolf = new Wolf;
@@ -320,7 +321,6 @@ void drawLineOfWalls(TileMap &map, Coordinate start, Coordinate end, Material m,
     for (uint x = start.x; x < end.x; x++) {
         Coordinate currentPos = steep ? Coordinate{y, x} : Coordinate{x, y};
 
-        // TODO: FIX
         map.setWallMaterial(currentPos, m, health);
 
         error -= dy;
@@ -336,12 +336,14 @@ bool loadSpriteSetFromFile(SDL_Renderer *renderer, SpriteSet &spriteSet, const s
     if (!renderer || fileName.empty())
         return false;
 
+    printf("Loading tiles...\n");
+
     // Get the path of the SpriteSet and load it.
     const std::string path = getResourcePath("tileset") + fileName;
     const uint NTiles = spriteSet.loadFromFile(renderer, path, TILE_WIDTH, TILE_HEIGHT);
 
     // Print the number of elements loaded.
-    printf("Loaded %u tiles\n", NTiles);
+    printf("   Loaded %u tiles\n", NTiles);
 
     // If no elements could not be loaded, return false.
     if (NTiles)
