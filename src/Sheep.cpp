@@ -23,7 +23,7 @@ Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
     selfEnergy += energy;
     while (selfEnergy >= energyNeededForMove) {
 
-        auto foundEntities = worldPointer->getObjectsInCircle(selfReference.position, 100, true, false).entitiesFound;
+        auto foundEntities = worldPointer->getObjectsInCircle(selfReference.position, 50, true, false).entitiesFound;
 
         ObjectAndData<Ientity, EID> enemyPtr(nullptr, 0, Coordinate());
         uint enemyDistance = 0;

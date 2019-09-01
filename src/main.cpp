@@ -26,14 +26,14 @@ const SpriteInteraction TI_ERROR = SpriteInteraction{"TI_ERROR", 3, 3, 3, 3, 3, 
 const SDL_Color COLOR_ERROR = SDL_Color{0xFF, 0x00, 0xFF};
 const std::string SIFileName = "spritedefinitions_default.txt";
 const std::string colorSetFileName = "colorset_default.txt";
-const std::string spriteSetFileName = "derived_luculent_15x15.png";
-const uint TILE_WIDTH = 15;
-const uint TILE_HEIGHT = 15;
+const std::string spriteSetFileName = "pixel_1x1.png";
+const uint TILE_WIDTH = 1;
+const uint TILE_HEIGHT = 1;
 const uint MAX_SI = 500;
 const uint MAX_COLOR = 500;
 
 // Screen constants
-const int SCREEN_FPS = 45;
+const int SCREEN_FPS = 60;
 const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS;
 const int SCREEN_WIDTH = TILE_WIDTH * WORLD_WIDTH;
 const int SCREEN_HEIGHT = TILE_HEIGHT * WORLD_HEIGHT;
@@ -113,32 +113,28 @@ int main(int argc, char *args[]) {
             // Create a wolf.
             auto *wolf = new Wolf;
 
-            // Create 40 sheep.
-            std::vector<Ientity *> theHerd;
-            for (uint i = 0; i < 40; i++)
-                theHerd.push_back(new Sheep);
+            // Fill the world with sheep
+            std::vector<Ientity *> sheep;
+            for (uint row = (WORLD_HEIGHT / 2); row < WORLD_HEIGHT; row++)
+            {
+                for (uint column = 0; column < WORLD_WIDTH; column++)
+                {
+                    // Leave a space for the wolf.
+                    if ((row == 0) && (column == 0))
+                        continue;
+
+                    a.addEntity(new Sheep, Coordinate{row, column});
+                }
+            }
 
             // Add the wolf to the center of the world.
-            a.addEntity(wolf, Coordinate{WORLD_WIDTH / 2, WORLD_HEIGHT / 2});
+            a.addEntity(wolf, Coordinate{0, 0});
 
             // Set the floor material to grass, and the wall material to air.
             Material grassTmp = M_GRASS;
             Material airTmp = M_AIR;
             setWorldFloorToMaterial(*(a.getMap()), grassTmp);
             setWorldWallToMaterial(*(a.getMap()), airTmp, airTmp.baseHealth);
-
-            // Place the sheep in a rough square around the wolf.
-            for (uint i = 0; i < 10; i++)
-                a.addEntity(theHerd.at(i), Coordinate{(WORLD_WIDTH / 2) - 10, ((WORLD_HEIGHT / 2) - 10) + i});
-
-            for (uint i = 10; i < 20; i++)
-                a.addEntity(theHerd.at(i), Coordinate{(WORLD_WIDTH / 2) + 10, ((WORLD_HEIGHT / 2) - 10) + i});
-
-            for (uint i = 20; i < 30; i++)
-                a.addEntity(theHerd.at(i), Coordinate{((WORLD_HEIGHT / 2) - 15) + i, (WORLD_HEIGHT / 2) - 10});
-
-            for (uint i = 30; i < 40; i++)
-                a.addEntity(theHerd.at(i), Coordinate{((WORLD_WIDTH / 2) + 15) + i, (WORLD_HEIGHT / 2) - 10});
 
             // Create a test item and add it to the test world.
             auto *testItem = new ItemTestStick;
@@ -205,14 +201,14 @@ int main(int argc, char *args[]) {
                 SDL_RenderPresent(gRenderer);
 
                 // Wait out the rest of the frame.
-                int elapsedTicks = fpsReg.getTicks();
-                if (elapsedTicks < SCREEN_TICKS_PER_FRAME)
-                    SDL_Delay((Uint32) (SCREEN_TICKS_PER_FRAME - elapsedTicks));
+                //int elapsedTicks = fpsReg.getTicks();
+                //if (elapsedTicks < SCREEN_TICKS_PER_FRAME)
+                //    SDL_Delay((Uint32) (SCREEN_TICKS_PER_FRAME - elapsedTicks));
 
                 // Tick the chunk.
                 a.tick();
 
-                //printf("Tick: %u\n", a.getTickNumber());
+                printf("Tick: %u\n", a.getTickNumber());
             }
         }
     }

@@ -54,40 +54,34 @@ enum class DamageType {
 
 // If the given coordinate is outside the given bound (defined by its max coordinate,) the function returns true.
 inline bool cordOutsideBound(const Coordinate &maxCord, const Coordinate &cord) {
-    if ((maxCord.x < cord.x) || (maxCord.y < cord.y))
-        return true;
-    else
-        return false;
+    return (maxCord.x < cord.x) || (maxCord.y < cord.y);
 }
 
 // Returns true if the given point is inside the given rectangle.
 inline bool
 cordInsideRect(const Coordinate &rrectStart, const uint &height, const uint &width, const Coordinate &point) {
-    if ((point.x >= rrectStart.x) && (point.y >= rrectStart.y) &&
-        (point.x <= (rrectStart.x + width)) && (point.y <= (rrectStart.y + width)))
-        return true;
-    else
-        return false;
+    return (point.x >= rrectStart.x) && (point.y >= rrectStart.y) &&
+           (point.x <= (rrectStart.x + width)) && (point.y <= (rrectStart.y + width));
 
 }
 
 // For determining if two coordinates are the same.
 inline bool operator==(const Coordinate &c1, const Coordinate &c2) {
-    if ((c1.x == c2.x) && (c1.y == c2.y))
-        return true;
-    else
-        return false;
+    return (c1.x == c2.x) && (c1.y == c2.y);
 }
 
 inline double distance(const Coordinate &c1, const Coordinate &c2) {
-    if (c1 == c2)
-        return 0;
-    else
-        return std::sqrt(pow((int) c1.x - (int) c2.x, 2) + pow((int) c1.y - (int) c2.y, 2));
+    return std::sqrt(pow((int) c1.x - (int) c2.x, 2) + pow((int) c1.y - (int) c2.y, 2));
 }
 
-inline uint getArrayIndex(const Coordinate &coordinate, const uint arrayWidth)
-{
+inline bool distanceFast(const Coordinate &c1, const Coordinate &c2, const uint &radius) {
+    const uint dx = (int) c1.x - (int) c2.x;
+    const uint dy = (int) c1.y - (int) c2.y;
+    const uint distanceSqrd = radius * radius;
+    return (uint) ((dx * dx) + (dy * dy)) <= distanceSqrd;
+}
+
+inline uint getArrayIndex(const Coordinate &coordinate, const uint arrayWidth) {
     return coordinate.x + (coordinate.y * arrayWidth);
 }
 

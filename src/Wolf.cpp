@@ -27,7 +27,8 @@ Wolf::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
     while (selfEnergy >= energyNeededForMoveAndAttack) {
         selfEnergy -= energyNeededForMoveAndAttack;
 
-        auto foundEntities = worldPointer->getObjectsInCircle(selfReference.position, 100, true, false).entitiesFound;
+        auto searchResult = worldPointer->getObjectsInCircle(selfReference.position, 500, true, false);
+        auto &foundEntities = searchResult.entitiesFound;
 
         ObjectAndData<Ientity, EID> target(nullptr, 0, Coordinate());
         uint targetDistance = 0;
