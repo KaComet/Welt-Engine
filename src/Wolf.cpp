@@ -23,6 +23,8 @@ Wolf::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
     bool wasMoved = false;
 
     selfEnergy += energy;
+    if (selfEnergy > maxEnergy)
+        selfEnergy = maxEnergy;
 
     while (selfEnergy >= energyNeededForMoveAndAttack) {
         selfEnergy -= energyNeededForMoveAndAttack;

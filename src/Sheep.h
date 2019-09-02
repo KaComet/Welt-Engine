@@ -31,6 +31,7 @@ protected:
 
 private:
     const uint energyNeededForMove = 100;
+    const uint maxEnergy = 200;
     uint objectType, selfHealth, selfEnergy;
     Material selfMaterial{};
     DisplayID entityDisplay;

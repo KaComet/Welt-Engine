@@ -17,8 +17,8 @@
 #include <fstream>
 #include <SDL_image.h>
 
-const uint WORLD_HEIGHT = 50;
-const uint WORLD_WIDTH = 50;
+const uint WORLD_HEIGHT = 100;
+const uint WORLD_WIDTH = 100;
 const uint ENERGY_PER_TICK = 100;
 
 // Sprite, SI, color, and file name constants
@@ -26,9 +26,9 @@ const SpriteInteraction TI_ERROR = SpriteInteraction{"TI_ERROR", 3, 3, 3, 3, 3, 
 const SDL_Color COLOR_ERROR = SDL_Color{0xFF, 0x00, 0xFF};
 const std::string SIFileName = "spritedefinitions_default.txt";
 const std::string colorSetFileName = "colorset_default.txt";
-const std::string spriteSetFileName = "pixel_1x1.png";
-const uint TILE_WIDTH = 1;
-const uint TILE_HEIGHT = 1;
+const std::string spriteSetFileName = "pixel_3x3.png";
+const uint TILE_WIDTH = 3;
+const uint TILE_HEIGHT = 3;
 const uint MAX_SI = 500;
 const uint MAX_COLOR = 500;
 

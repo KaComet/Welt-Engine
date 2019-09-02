@@ -21,9 +21,17 @@ Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
     bool wasMoved = false;
 
     selfEnergy += energy;
+    if (selfEnergy > maxEnergy)
+        selfEnergy = maxEnergy;
+
     while (selfEnergy >= energyNeededForMove) {
 
-        auto foundEntities = worldPointer->getObjectsInCircle(selfReference.coordinate(), 50, true, false).entitiesFound;
+        auto foundEntities = worldPointer->getObjectsInCircle(selfReference.coordinate(), 1, true, false).entitiesFound;
+
+        if (foundEntities.size() >= 5)
+            break;
+
+        foundEntities = worldPointer->getObjectsInCircle(selfReference.coordinate(), 100, true, false).entitiesFound;
 
         ObjectAndData<Ientity, EID> enemyPtr(nullptr, nullptr, true, 0, Coordinate());
         uint enemyDistance = 0;
@@ -41,11 +49,8 @@ Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
             }
         }
 
-        if (enemyPtr.isPlaceholder()) {
+        if (enemyPtr.isPlaceholder())
             break;
-        }
-
-        selfEnergy -= energyNeededForMove;
 
         Coordinate delta = Coordinate{1, 1};
         if (enemyPtr.coordinate().x > selfReference.coordinate().x)
@@ -65,9 +70,10 @@ Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
         if ((!isNextTileClear) || (!nextTile) || (nextTile->wallMaterial.materialType != MaterialType::GAS))
             return EffectedType::NONE;
 
-        if (worldPointer->moveEntity(selfReference, nextPos))
+        if (worldPointer->moveEntity(selfReference, nextPos)) {
             wasMoved = true;
-
+            selfEnergy -= energyNeededForMove;
+        }
     }
 
     if (wasMoved)
