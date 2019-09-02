@@ -9,28 +9,48 @@
 using namespace std;
 
 template<class Object, class ID_Type>
-struct ObjectAndData {
-    explicit ObjectAndData(Object *pointer = nullptr, ID_Type ID_Number = 0, Coordinate position = Coordinate{0, 0})
-            : pointer(pointer), position(position), ID_Number(ID_Number) {};
+class ObjectAndData {
+public:
+    explicit ObjectAndData(Object *pointer, bool *lockPointer, bool isPlaceholder, ID_Type ID_Number,
+                           Coordinate position) : _pointer(pointer), _lockPointer(lockPointer),
+                                                  _isPlaceholder(isPlaceholder),
+                                                  _position(position), _ID_Number(ID_Number) {};
 
-    Object *pointer;
-    ID_Type ID_Number;
-    Coordinate position;
+private:
+    Object *_pointer;
+    ID_Type _ID_Number;
+    Coordinate _position;
+    bool *_lockPointer;
+    bool _isPlaceholder;
+
+public:
+    Object &object() { return *_pointer; }
+
+    ID_Type id() const { return _ID_Number; }
+
+    Coordinate coordinate() const { return _position; }
+
+    Coordinate &mutCoordinate() {
+        //TODO: Change this to a custom exception.
+        if (*_lockPointer)
+            throw "Attempted to access a lock ObjectAndPointer.";
+        else
+            return _position;
+    }
+
+    bool isPlaceholder() const { return _isPlaceholder; }
 };
 
 // For determining if two ObjectAndData objects are the same.
 template<class Object, typename ID_Type>
 inline bool operator==(const ObjectAndData<Object, ID_Type> &op1, const ObjectAndData<Object, ID_Type> &op2) {
-    if ((op1.pointer == op2.pointer) && (op1.ID_Number == op2.ID_Number) && (op1.position == op2.position))
-        return true;
-    else
-        return false;
+    return (op1.id() == op2.id()) && (op1.coordinate() == op2.coordinate());
 }
 
 template<class EntityType, class ItemType>
 struct SearchResult {
-    vector<ObjectAndData<EntityType, EID>> entitiesFound;
-    vector<ObjectAndData<ItemType, IID>> itemsFound;
+    vector<ObjectAndData<EntityType, EID>*> entitiesFound;
+    vector<ObjectAndData<ItemType, IID>*> itemsFound;
 };
 
 template<class EntityType, class ItemType>

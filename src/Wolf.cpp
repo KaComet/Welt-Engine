@@ -27,47 +27,47 @@ Wolf::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
     while (selfEnergy >= energyNeededForMoveAndAttack) {
         selfEnergy -= energyNeededForMoveAndAttack;
 
-        auto searchResult = worldPointer->getObjectsInCircle(selfReference.position, 500, true, false);
+        auto searchResult = worldPointer->getObjectsInCircle(selfReference.coordinate(), 500, true, false);
         auto &foundEntities = searchResult.entitiesFound;
 
-        ObjectAndData<Ientity, EID> target(nullptr, 0, Coordinate());
+        ObjectAndData<Ientity, EID> target(nullptr, nullptr, true, 0, Coordinate());
         uint targetDistance = 0;
 
-        for (const auto &entPtr : foundEntities) {
-            if ((entPtr.pointer != this) && (entPtr.pointer) && (entPtr.pointer->getObjectType() == 1)) {
-                uint entDistance = (uint) ceil(distance(selfReference.position, entPtr.position));
-                if (!target.pointer) {
-                    target = entPtr;
+        for (auto &entPtr : foundEntities) {
+            if ((entPtr->id() != selfReference.id()) && (entPtr->object().getObjectType() == 1)) {
+                uint entDistance = (uint) ceil(distance(selfReference.coordinate(), entPtr->coordinate()));
+                if (target.isPlaceholder()) {
+                    target = *entPtr;
                     targetDistance = entDistance;
-                } else if ((entDistance < targetDistance) && (entPtr.pointer->getHealth() != 0)) {
-                    target = entPtr;
+                } else if ((entDistance < targetDistance) && (entPtr->object().getHealth() != 0)) {
+                    target = *entPtr;
                     targetDistance = entDistance;
                 }
 
                 if (targetDistance <= 1) {
-                    target.pointer->takeDamage(selfReference.ID_Number, 10, DamageType::KINETIC);
+                    target.object().takeDamage(selfReference.id(), 10, DamageType::KINETIC);
                     continue;
                 }
             }
         }
 
-        if (!target.pointer) {
+        if (target.isPlaceholder()) {
             return EffectedType::NONE;
         }
 
         Coordinate delta = Coordinate{1, 1};
-        if (target.position.x > selfReference.position.x)
+        if (target.coordinate().x > selfReference.coordinate().x)
             delta.x = 2;
-        else if (target.position.x < selfReference.position.x)
+        else if (target.coordinate().x < selfReference.coordinate().x)
             delta.x = 0;
 
-        if (target.position.y > selfReference.position.y)
+        if (target.coordinate().y > selfReference.coordinate().y)
             delta.y = 2;
-        else if (target.position.y < selfReference.position.y)
+        else if (target.coordinate().y < selfReference.coordinate().y)
             delta.y = 0;
 
-        Coordinate nextPos = Coordinate{(selfReference.position.x + delta.x) - 1,
-                                        (selfReference.position.y + delta.y) - 1};
+        Coordinate nextPos = Coordinate{(selfReference.coordinate().x + delta.x) - 1,
+                                        (selfReference.coordinate().y + delta.y) - 1};
         Tile *nextTile = map->at(nextPos);
         if ((nextTile == nullptr) || (nextTile->wallMaterial.materialType != MaterialType::GAS))
             return EffectedType::NONE;

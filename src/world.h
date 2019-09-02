@@ -67,6 +67,7 @@ private:
     uint givenEnergyPerTick, tickNumber, chunkSize, maxChunkNumber;
     EID nextAvailableOID;
     EID nextAvailableIID;
+    bool isDataLocked;
     list<ObjectAndData<Ientity, EID>> entitiesInWorld;
     vector<list<ObjectAndData<Ientity, EID> *>> entitiesInChunks;
     list<ObjectAndData<Iitem, IID>> itemsInWorld;

@@ -23,43 +23,43 @@ Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
     selfEnergy += energy;
     while (selfEnergy >= energyNeededForMove) {
 
-        auto foundEntities = worldPointer->getObjectsInCircle(selfReference.position, 50, true, false).entitiesFound;
+        auto foundEntities = worldPointer->getObjectsInCircle(selfReference.coordinate(), 50, true, false).entitiesFound;
 
-        ObjectAndData<Ientity, EID> enemyPtr(nullptr, 0, Coordinate());
+        ObjectAndData<Ientity, EID> enemyPtr(nullptr, nullptr, true, 0, Coordinate());
         uint enemyDistance = 0;
 
-        for (const auto &entPtr : foundEntities) {
-            if ((entPtr.pointer != this) && (entPtr.pointer) && (entPtr.pointer->getObjectType() == 2)) {
-                uint entDistance = (uint) ceil(distance(selfReference.position, entPtr.position));
-                if (!enemyPtr.pointer) {
-                    enemyPtr = entPtr;
+        for (auto &entPtr : foundEntities) {
+            if ((entPtr->id() != selfReference.id()) && (entPtr->object().getObjectType() == 2)) {
+                uint entDistance = (uint) ceil(distance(selfReference.coordinate(), entPtr->coordinate()));
+                if (enemyPtr.isPlaceholder()) {
+                    enemyPtr = *entPtr;
                     enemyDistance = entDistance;
                 } else if (entDistance < enemyDistance) {
-                    enemyPtr = entPtr;
+                    enemyPtr = *entPtr;
                     enemyDistance = entDistance;
                 }
             }
         }
 
-        if (!enemyPtr.pointer) {
+        if (enemyPtr.isPlaceholder()) {
             break;
         }
 
         selfEnergy -= energyNeededForMove;
 
         Coordinate delta = Coordinate{1, 1};
-        if (enemyPtr.position.x > selfReference.position.x)
+        if (enemyPtr.coordinate().x > selfReference.coordinate().x)
             delta.x = 0;
-        else if (enemyPtr.position.x < selfReference.position.x)
+        else if (enemyPtr.coordinate().x < selfReference.coordinate().x)
             delta.x = 2;
 
-        if (enemyPtr.position.y > selfReference.position.y)
+        if (enemyPtr.coordinate().y > selfReference.coordinate().y)
             delta.y = 0;
-        else if (enemyPtr.position.y < selfReference.position.y)
+        else if (enemyPtr.coordinate().y < selfReference.coordinate().y)
             delta.y = 2;
 
-        Coordinate nextPos = Coordinate{(selfReference.position.x + delta.x) - 1,
-                                        (selfReference.position.y + delta.y) - 1};
+        Coordinate nextPos = Coordinate{(selfReference.coordinate().x + delta.x) - 1,
+                                        (selfReference.coordinate().y + delta.y) - 1};
         Tile *nextTile = map->at(nextPos);
         bool isNextTileClear = worldPointer->getObjectsOnTile(nextPos, true, false).entitiesFound.empty();
         if ((!isNextTileClear) || (!nextTile) || (nextTile->wallMaterial.materialType != MaterialType::GAS))
