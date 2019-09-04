@@ -1,6 +1,8 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include "ObjectSearchCircle.h"
+#include "IObjectSearch.h"
 #include "DisplayIDdef.h"
 #include "universal.h"
 #include "material.h"
@@ -18,7 +20,7 @@
 
 using namespace std;
 
-class World : public Iworld<Ientity, Iitem> {
+class World : public Iworld<Ientity, EID, Iitem, IID> {
 public:
     World(uint height, uint width, uint energyPerTick);
 
@@ -43,15 +45,15 @@ public:
 
     bool deleteEntity(EID objectID);
 
-    SearchResult<Ientity, Iitem> getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) override;
+    SearchResult<Ientity, EID, Iitem, IID> getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) override;
 
-    SearchResult<Ientity, Iitem>
+    SearchResult<Ientity, EID, Iitem, IID>
     getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntities, bool getItems) override;
 
-    SearchResult<Ientity, Iitem>
+    SearchResult<Ientity, EID, Iitem, IID>
     getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getEntities, bool getItems) override;
 
-    SearchResult<Ientity, Iitem>
+    SearchResult<Ientity, EID, Iitem, IID>
     getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities, bool getItems) override;
 
     bool addItem(Iitem *itemPtr, Coordinate cord) override;

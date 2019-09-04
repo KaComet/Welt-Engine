@@ -13,7 +13,7 @@ std::vector<std::size_t> Sheep::getEntityTypeHash() {
 }
 
 EffectedType
-Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
+Sheep::tick(Iworld<Ientity, EID, Iitem, IID> *worldPointer, TileMap *map,
             const ObjectAndData<Ientity, EID> &selfReference, uint energy) {
     if (selfHealth == 0)
         return EffectedType::DELETED;
@@ -25,25 +25,36 @@ Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
         selfEnergy = maxEnergy;
 
     while (selfEnergy >= energyNeededForMove) {
+        auto tmpResults = worldPointer->getObjectsInCircle(selfReference.coordinate(), 1, true, false);
 
-        auto foundEntities = worldPointer->getObjectsInCircle(selfReference.coordinate(), 1, true, false).entitiesFound;
 
-        if (foundEntities.size() >= 5)
-            break;
+        uint count = 0;
+        while (!tmpResults.entitiesFound->_isAtEnd) {
+            ++count;
+            tmpResults.entitiesFound->next();
+        }
 
-        foundEntities = worldPointer->getObjectsInCircle(selfReference.coordinate(), 100, true, false).entitiesFound;
+
+        if (count >= 5)
+            return EffectedType::NONE;
+
+
+        SearchResult<Ientity, EID, Iitem, IID> searchResults = worldPointer->getObjectsInCircle(
+                selfReference.coordinate(), 100, true, false);
 
         ObjectAndData<Ientity, EID> enemyPtr(nullptr, nullptr, true, 0, Coordinate());
         uint enemyDistance = 0;
 
-        for (auto &entPtr : foundEntities) {
-            if ((entPtr->id() != selfReference.id()) && (entPtr->object().getObjectType() == 2)) {
-                uint entDistance = (uint) ceil(distance(selfReference.coordinate(), entPtr->coordinate()));
+        for (; !searchResults.entitiesFound->isAtEnd(); searchResults.entitiesFound->next()) {
+            if ((searchResults.entitiesFound->id() != selfReference.id()) &&
+                (searchResults.entitiesFound->object().getObjectType() == 2)) {
+                uint entDistance = (uint) ceil(
+                        distance(selfReference.coordinate(), searchResults.entitiesFound->position()));
                 if (enemyPtr.isPlaceholder()) {
-                    enemyPtr = *entPtr;
+                    enemyPtr = searchResults.entitiesFound->ObjectAndDataCopy();
                     enemyDistance = entDistance;
                 } else if (entDistance < enemyDistance) {
-                    enemyPtr = *entPtr;
+                    enemyPtr = searchResults.entitiesFound->ObjectAndDataCopy();
                     enemyDistance = entDistance;
                 }
             }
@@ -66,14 +77,18 @@ Sheep::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
         Coordinate nextPos = Coordinate{(selfReference.coordinate().x + delta.x) - 1,
                                         (selfReference.coordinate().y + delta.y) - 1};
         Tile *nextTile = map->at(nextPos);
-        bool isNextTileClear = worldPointer->getObjectsOnTile(nextPos, true, false).entitiesFound.empty();
-        if ((!isNextTileClear) || (!nextTile) || (nextTile->wallMaterial.materialType != MaterialType::GAS))
-            return EffectedType::NONE;
+        SearchResult<Ientity, EID, Iitem, IID> nextTileSearch = worldPointer->getObjectsOnTile(nextPos, true, false);
+        if (nextTileSearch.entitiesFound) {
+            bool isNextTileClear = nextTileSearch.entitiesFound->isAtEnd();
+            if ((!isNextTileClear) || (!nextTile) || (nextTile->wallMaterial.materialType != MaterialType::GAS))
+                return EffectedType::NONE;
 
-        if (worldPointer->moveEntity(selfReference, nextPos)) {
-            wasMoved = true;
-            selfEnergy -= energyNeededForMove;
-        }
+            if (worldPointer->moveEntity(selfReference, nextPos)) {
+                wasMoved = true;
+                selfEnergy -= energyNeededForMove;
+            }
+        } else
+            break;
     }
 
     if (wasMoved)

@@ -17,7 +17,7 @@ public:
     virtual std::vector<std::size_t> getEntityTypeHash() = 0;
 
     virtual EffectedType
-    tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map, const ObjectAndData<Ientity, EID> &selfReference,
+    tick(Iworld<Ientity, EID ,Iitem, IID> *worldPointer, TileMap *map, const ObjectAndData<Ientity, EID> &selfReference,
          uint energy) = 0;
 
     virtual EffectedType takeDamage(EID attacker, uint damageAmount, DamageType type) = 0;

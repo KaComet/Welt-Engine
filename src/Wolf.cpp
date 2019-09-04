@@ -14,9 +14,8 @@ std::vector<std::size_t> Wolf::getEntityTypeHash() {
 }
 
 EffectedType
-Wolf::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
+Wolf::tick(Iworld<Ientity, EID, Iitem, IID> *worldPointer, TileMap *map,
            const ObjectAndData<Ientity, EID> &selfReference, uint energy) {
-
     if (selfHealth == 0)
         return EffectedType::DELETED;
 
@@ -29,20 +28,19 @@ Wolf::tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
     while (selfEnergy >= energyNeededForMoveAndAttack) {
         selfEnergy -= energyNeededForMoveAndAttack;
 
-        auto searchResult = worldPointer->getObjectsInCircle(selfReference.coordinate(), 500, true, false);
-        auto &foundEntities = searchResult.entitiesFound;
+        SearchResult<Ientity, EID, Iitem, IID> searchResult = worldPointer->getObjectsInCircle(selfReference.coordinate(), 500, true, false);
 
         ObjectAndData<Ientity, EID> target(nullptr, nullptr, true, 0, Coordinate());
         uint targetDistance = 0;
 
-        for (auto &entPtr : foundEntities) {
-            if ((entPtr->id() != selfReference.id()) && (entPtr->object().getObjectType() == 1)) {
-                uint entDistance = (uint) ceil(distance(selfReference.coordinate(), entPtr->coordinate()));
+        for ( ; !searchResult.entitiesFound->isAtEnd(); searchResult.entitiesFound->next()) {
+            if ((searchResult.entitiesFound->id() != selfReference.id()) && (searchResult.entitiesFound->object().getObjectType() == 1)) {
+                uint entDistance = (uint) ceil(distance(selfReference.coordinate(), searchResult.entitiesFound->position()));
                 if (target.isPlaceholder()) {
-                    target = *entPtr;
+                    target = searchResult.entitiesFound->ObjectAndDataCopy();
                     targetDistance = entDistance;
-                } else if ((entDistance < targetDistance) && (entPtr->object().getHealth() != 0)) {
-                    target = *entPtr;
+                } else if ((entDistance < targetDistance) && (searchResult.entitiesFound->object().getHealth() != 0)) {
+                    target = searchResult.entitiesFound->ObjectAndDataCopy();
                     targetDistance = entDistance;
                 }
 

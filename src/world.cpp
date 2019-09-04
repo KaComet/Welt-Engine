@@ -64,7 +64,8 @@ void World::loadDisplayArray(DisplayArray &displayArray) {
     // Scan through and load all items' info into the DisplayArray.
     for (auto &itemData : itemsInWorld) {
         if (!cordOutsideBound(map->maxCord(), itemData.coordinate())) {
-            DisplayArrayElement &tmp = displayArray.displayData[getArrayIndex(itemData.coordinate(), displayArray.width)];
+            DisplayArrayElement &tmp = displayArray.displayData[getArrayIndex(itemData.coordinate(),
+                                                                              displayArray.width)];
 
             tmp.ForegroundInfo = itemData.object().getDisplayID();
             tmp.ForegroundColor = itemData.object().getMaterial().color;
@@ -74,7 +75,8 @@ void World::loadDisplayArray(DisplayArray &displayArray) {
     // Scan through and load all entities' info into the DisplayArray.
     for (auto &entityData : entitiesInWorld) {
         if (!cordOutsideBound(map->maxCord(), entityData.coordinate())) {
-            DisplayArrayElement &tmp = displayArray.displayData[getArrayIndex(entityData.coordinate(), displayArray.width)];
+            DisplayArrayElement &tmp = displayArray.displayData[getArrayIndex(entityData.coordinate(),
+                                                                              displayArray.width)];
 
             tmp.ForegroundInfo = entityData.object().getDisplayID();
             tmp.ForegroundColor = entityData.object().getMaterial().color;
@@ -176,8 +178,9 @@ bool World::moveEntity(const ObjectAndData<Ientity, EID> &entityData, Coordinate
 }
 
 // Returns the entity and/or the items at the given tile.
-SearchResult<Ientity, Iitem> World::getObjectsOnTile(Coordinate cord, const bool getEntities, const bool getItems) {
-    SearchResult<Ientity, Iitem> result;
+SearchResult<Ientity, EID, Iitem, IID>
+World::getObjectsOnTile(Coordinate cord, const bool getEntities, const bool getItems) {
+    SearchResult<Ientity, EID, Iitem, IID> result;
 
     // If the given coordinate is outside the bounds of the world, return;
     if (cordOutsideBound(map->maxCord(), cord))
@@ -185,25 +188,23 @@ SearchResult<Ientity, Iitem> World::getObjectsOnTile(Coordinate cord, const bool
 
     // Find the chunk number for the coordinate and create a reference to that chunk.
     const uint chunkNumber = getChunkNumberForCoordinate(cord);
+    vector<list<ObjectAndData<Ientity, EID> *> *> entityChunk;
+    vector<list<ObjectAndData<Iitem, IID> *> *> itemChunk;
+    entityChunk.push_back(&entitiesInChunks[chunkNumber]);
+    itemChunk.push_back(&itemsInChunks[chunkNumber]);
 
     // If it was specified to look for entities, scan through the the entities in the
     //   chunk, looking for an entity that is on the specified tile.
-    if (getEntities) {
-        for (auto &entity : entitiesInChunks[chunkNumber]) {
-            if (entity->coordinate() == cord) {
-                result.entitiesFound.push_back(entity);
-                break;
-            }
-        }
-    }
+    if (getEntities)
+        result.entitiesFound = new ObjectSearchCircle<Ientity, EID>(entityChunk, cord, 0);
 
     // If it was specified to look for items, scan through the the items in the
     //   chunk, looking for items that are on the specified tile.
-    if (getItems) {
-        for (auto &itmPtr : itemsInChunks[chunkNumber])
-            if (itmPtr->coordinate() == cord)
-                result.itemsFound.push_back(itmPtr);
-    }
+    if (getItems)
+        result.itemsFound = new ObjectSearchCircle<Iitem, IID>(itemChunk, cord, 0);
+
+    if (!result.entitiesFound)
+        printf("Boi");
 
     return result;
 }
@@ -389,10 +390,11 @@ vector<uint> World::getChunksInRect(const Coordinate &rectStart, uint height, ui
 }
 
 // Note: the order of the entities in the returned vector are not in any specific order.
-SearchResult<Ientity, Iitem>
+SearchResult<Ientity, EID, Iitem, IID>
 World::getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntities, bool getItems) {
-    SearchResult<Ientity, Iitem> result;
+    SearchResult<Ientity, EID, Iitem, IID> result;
 
+    /*
     // Bresenham's line algorithm. Adapted from https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
     const bool steep = (fabs(lineEnd.y - lineStart.y) > fabs(lineEnd.x - lineStart.x));
     if (steep) {
@@ -430,15 +432,18 @@ World::getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntiti
             error += dx;
         }
     }
+     */
 
     return result;
 }
 
 // Returns vectors containing pointers to any entities and/or items found in the given rectangle.
-SearchResult<Ientity, Iitem>
+SearchResult<Ientity, EID, Iitem, IID>
 World::getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getEntities, bool getItems) {
-    SearchResult<Ientity, Iitem> result;
 
+    SearchResult<Ientity, EID, Iitem, IID> result;
+
+    /*
     // If the width and/or the height is zero, return.
     if ((height == 0) || (width == 0))
         return result;
@@ -476,14 +481,15 @@ World::getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getE
             }
         }
     }
+     */
 
     return result;
 }
 
 // Returns vectors containing pointers to any entities and/or items found in the given circle.
-SearchResult<Ientity, Iitem>
+SearchResult<Ientity, EID, Iitem, IID>
 World::getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities, bool getItems) {
-    SearchResult<Ientity, Iitem> result;
+    SearchResult<Ientity, EID, Iitem, IID> result;
 
     const uint rectSideLength = (radius * 2) + 1;
     Coordinate rectEquivalent = Coordinate{circleCenter.x - radius, circleCenter.y - radius};
@@ -496,37 +502,18 @@ World::getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities
 
     // Find the numbers of the chunks in the rectangle.
     const vector<uint> cChunksInRect = this->getChunksInRect(rectEquivalent, rectSideLength, rectSideLength);
-
-    uint maxNumberOfEntities = 0;
-    uint maxNumberOfItems = 0;
-
-    for (const auto& chunkNumber : cChunksInRect)
-    {
-        maxNumberOfEntities += entitiesInChunks[chunkNumber].size();
-        maxNumberOfItems += itemsInChunks[chunkNumber].size();
+    vector<list<ObjectAndData<Ientity, EID> *>*> entityChunks;
+    vector<list<ObjectAndData<Iitem, IID> *> *> itemChunks;
+    for (const auto &chunk : cChunksInRect) {
+        entityChunks.push_back(&entitiesInChunks[chunk]);
+        itemChunks.push_back(&itemsInChunks[chunk]);
     }
 
     if (getEntities)
-        result.entitiesFound.reserve(maxNumberOfEntities);
+        result.entitiesFound = new ObjectSearchCircle<Ientity, EID>(entityChunks, circleCenter, radius);
 
     if (getItems)
-        result.itemsFound.reserve(maxNumberOfItems);
-
-    for (const auto &currentChunk : cChunksInRect) {
-        if (getEntities) {
-            for (const auto &currentEntity : entitiesInChunks[currentChunk]) {
-                if (distanceFast(circleCenter, currentEntity->coordinate(), radius))
-                    result.entitiesFound.push_back(currentEntity);
-            }
-        }
-
-        if (getItems) {
-            for (const auto &currentItem : itemsInChunks[currentChunk]) {
-                if (distanceFast(circleCenter, currentItem->coordinate(), radius))
-                    result.itemsFound.push_back(currentItem);
-            }
-        }
-    }
+        result.itemsFound = new ObjectSearchCircle<Iitem, IID>(itemChunks, circleCenter, radius);
 
     return result;
 }

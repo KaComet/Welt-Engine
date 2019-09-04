@@ -1,45 +1,13 @@
 #ifndef IWORLD_H
 #define IWORLD_H
 
-#include "material.h"
 #include "universal.h"
+#include "ObjectAndData.h"
+#include "IObjectSearch.h"
 #include <vector>
 #include <utility>
 
 using namespace std;
-
-template<class Object, class ID_Type>
-class ObjectAndData {
-public:
-    explicit ObjectAndData(Object *pointer, bool *lockPointer, bool isPlaceholder, ID_Type ID_Number,
-                           Coordinate position) : _pointer(pointer), _lockPointer(lockPointer),
-                                                  _isPlaceholder(isPlaceholder),
-                                                  _position(position), _ID_Number(ID_Number) {};
-
-private:
-    Object *_pointer;
-    ID_Type _ID_Number;
-    Coordinate _position;
-    bool *_lockPointer;
-    bool _isPlaceholder;
-
-public:
-    Object &object() { return *_pointer; }
-
-    ID_Type id() const { return _ID_Number; }
-
-    Coordinate coordinate() const { return _position; }
-
-    Coordinate &mutCoordinate() {
-        //TODO: Change this to a custom exception.
-        if (*_lockPointer)
-            throw "Attempted to access a lock ObjectAndPointer.";
-        else
-            return _position;
-    }
-
-    bool isPlaceholder() const { return _isPlaceholder; }
-};
 
 // For determining if two ObjectAndData objects are the same.
 template<class Object, typename ID_Type>
@@ -47,13 +15,25 @@ inline bool operator==(const ObjectAndData<Object, ID_Type> &op1, const ObjectAn
     return (op1.id() == op2.id()) && (op1.coordinate() == op2.coordinate());
 }
 
-template<class EntityType, class ItemType>
-struct SearchResult {
-    vector<ObjectAndData<EntityType, EID>*> entitiesFound;
-    vector<ObjectAndData<ItemType, IID>*> itemsFound;
+template<class EntityType, class EntityID_Type, class ItemType, class ItemID_Type>
+class SearchResult {
+public:
+    SearchResult(IObjectSearch<EntityType, EntityID_Type> *entitiesFound = nullptr,
+                 IObjectSearch<ItemType, IID> *itemsFound = nullptr) : entitiesFound(entitiesFound),
+                                                                       itemsFound(itemsFound) {
+
+    }
+
+    ~SearchResult() {
+        delete entitiesFound;
+        delete itemsFound;
+    }
+
+    IObjectSearch<EntityType, EntityID_Type> *entitiesFound;
+    IObjectSearch<ItemType, ItemID_Type> *itemsFound;
 };
 
-template<class EntityType, class ItemType>
+template<class EntityType, class EntityID_Type, class ItemType, class ItemID_Type>
 class Iworld {
 public:
     Iworld() = default;
@@ -66,15 +46,16 @@ public:
 
     virtual bool addEntity(EntityType *entityToAdd, Coordinate cord) = 0;
 
-    virtual SearchResult<EntityType, ItemType> getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) = 0;
+    virtual SearchResult<EntityType, EntityID_Type, ItemType, ItemID_Type>
+    getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) = 0;
 
-    virtual SearchResult<EntityType, ItemType>
+    virtual SearchResult<EntityType, EntityID_Type, ItemType, ItemID_Type>
     getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntities, bool getItems) = 0;
 
-    virtual SearchResult<EntityType, ItemType>
+    virtual SearchResult<EntityType, EntityID_Type, ItemType, ItemID_Type>
     getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getEntities, bool getItems) = 0;
 
-    virtual SearchResult<EntityType, ItemType>
+    virtual SearchResult<EntityType, EntityID_Type, ItemType, ItemID_Type>
     getObjectsInCircle(Coordinate circleCenter, uint Radius, bool getEntities, bool getItems) = 0;
 
     virtual bool addItem(ItemType *itemPtr, Coordinate cord) = 0;

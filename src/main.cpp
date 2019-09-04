@@ -115,10 +115,8 @@ int main(int argc, char *args[]) {
 
             // Fill the world with sheep
             std::vector<Ientity *> sheep;
-            for (uint row = (WORLD_HEIGHT / 2); row < WORLD_HEIGHT; row++)
-            {
-                for (uint column = 0; column < WORLD_WIDTH; column++)
-                {
+            for (uint row = (WORLD_HEIGHT / 2); row < WORLD_HEIGHT; row++) {
+                for (uint column = 0; column < WORLD_WIDTH; column++) {
                     // Leave a space for the wolf.
                     if ((row == 0) && (column == 0))
                         continue;

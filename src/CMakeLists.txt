@@ -27,6 +27,11 @@ add_executable(welt
         SpriteInteractionsList.h
         Iitem.h
         TileMap.cpp
-        TileMap.h ItemTestStick.cpp ItemTestStick.h)
+        TileMap.h
+        ItemTestStick.cpp
+        ItemTestStick.h
+        IObjectSearch.h
+        ObjectAndData.h
+        ObjectSearchCircle.h)
 
 target_link_libraries(welt ${SDL2_LIBS} ${SDL2_IMAGE_LIBRARIES})

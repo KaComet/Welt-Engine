@@ -13,7 +13,7 @@ public:
 
     std::vector<std::size_t> getEntityTypeHash() override;
 
-    EffectedType tick(Iworld<Ientity, Iitem> *worldPointer, TileMap *map,
+    EffectedType tick(Iworld<Ientity, EID, Iitem, IID> *worldPointer, TileMap *map,
                       const ObjectAndData<Ientity, EID> &selfReference, uint energy) override;
 
     EffectedType takeDamage(EID attacker, uint damageAmount, DamageType type) override;
