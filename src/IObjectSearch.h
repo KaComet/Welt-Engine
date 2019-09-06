@@ -32,7 +32,7 @@ public:
         return _isAtEnd;
     };
 
-public:
+protected:
     vector<list<ObjectAndData<ObjectType, ID_Type> *>*> _chunksReference;
     bool _isAtEnd;
 };

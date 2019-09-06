@@ -29,7 +29,7 @@ Sheep::tick(Iworld<Ientity, EID, Iitem, IID> *worldPointer, TileMap *map,
 
 
         uint count = 0;
-        while (!tmpResults.entitiesFound->_isAtEnd) {
+        while (!tmpResults.entitiesFound->isAtEnd()) {
             ++count;
             tmpResults.entitiesFound->next();
         }

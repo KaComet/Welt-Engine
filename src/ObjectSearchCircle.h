@@ -31,8 +31,8 @@ public:
 protected:
     uint _radius;
     Coordinate _center;
-    typename vector<list<ObjectAndData<ObjectType, ID_Type> *> *>::iterator chunksIterator;
-    typename list<ObjectAndData<ObjectType, ID_Type> *>::iterator entityIterator;
+    typename vector<list<ObjectAndData<ObjectType, ID_Type> *> *>::iterator _chunksIterator;
+    typename list<ObjectAndData<ObjectType, ID_Type> *>::iterator _objectIterator;
 
 
 };
@@ -48,26 +48,26 @@ ObjectSearchCircle<ObjectType, ID_Type>::ObjectSearchCircle(
         return;
 
     bool foundViableEntity = false;
-    chunksIterator = this->_chunksReference.begin();
-    while (chunksIterator != this->_chunksReference.end()) {
-        if ((**chunksIterator).size() == 0) {
-            chunksIterator++;
+    _chunksIterator = this->_chunksReference.begin();
+    while (_chunksIterator != this->_chunksReference.end()) {
+        if ((**_chunksIterator).size() == 0) {
+            _chunksIterator++;
             continue;
         } else {
-            entityIterator = (**chunksIterator).begin();
-            while (entityIterator != (**chunksIterator).end()) {
-                if (distanceFast(this->_center, (*entityIterator)->coordinate(), _radius)) {
+            _objectIterator = (**_chunksIterator).begin();
+            while (_objectIterator != (**_chunksIterator).end()) {
+                if (distanceFast(this->_center, (*_objectIterator)->coordinate(), _radius)) {
                     foundViableEntity = true;
                     break;
                 }
-                entityIterator++;
+                _objectIterator++;
             }
             if (foundViableEntity) {
                 this->_isAtEnd = false;
                 break;
             }
         }
-        chunksIterator++;
+        _chunksIterator++;
     }
 }
 
@@ -76,52 +76,51 @@ void ObjectSearchCircle<ObjectType, ID_Type>::next() {
     if (this->_isAtEnd)
         throw std::out_of_range("oof"); //TODO: Add custom exception class instead of "oof."
 
-    entityIterator++;
+    _objectIterator++;
     while (!this->_isAtEnd) {
-        if (entityIterator == (**chunksIterator).end()) {
-            chunksIterator++;
-            while (chunksIterator != this->_chunksReference.end()) {
-                if ((**chunksIterator).size() == 0) {
-                    chunksIterator++;
+        if (_objectIterator == (**_chunksIterator).end()) {
+            _chunksIterator++;
+            while (_chunksIterator != this->_chunksReference.end()) {
+                if ((**_chunksIterator).size() == 0) {
+                    _chunksIterator++;
                     continue;
                 }
 
-                entityIterator = (**chunksIterator).begin();
+                _objectIterator = (**_chunksIterator).begin();
                 break;
             }
 
-            if (chunksIterator == this->_chunksReference.end()) {
+            if (_chunksIterator == this->_chunksReference.end()) {
                 this->_isAtEnd = true;
             }
         }
 
-        if ((this->_isAtEnd) || (distanceFast(this->_center, (*entityIterator)->coordinate(), _radius)))
+        if ((this->_isAtEnd) || (distanceFast(this->_center, (*_objectIterator)->coordinate(), _radius)))
             break;
         else
-            entityIterator++;
+            _objectIterator++;
     }
 
 }
 
 template<class ObjectType, class ID_Type>
 ID_Type ObjectSearchCircle<ObjectType, ID_Type>::id() {
-    return (*entityIterator)->id();
+    return (*_objectIterator)->id();
 }
 
 template<class ObjectType, class ID_Type>
 Coordinate ObjectSearchCircle<ObjectType, ID_Type>::position() {
-    return (*entityIterator)->coordinate();
+    return (*_objectIterator)->coordinate();
 }
 
 template<class ObjectType, class ID_Type>
 ObjectType &ObjectSearchCircle<ObjectType, ID_Type>::object() {
-    return (*entityIterator)->object();
+    return (*_objectIterator)->object();
 }
 
 template<class ObjectType, class ID_Type>
 ObjectAndData<ObjectType, ID_Type> ObjectSearchCircle<ObjectType, ID_Type>::ObjectAndDataCopy() {
-    //entityToAdd, &isDataLocked, false, nextAvailableOID++, cord
-    return **entityIterator;
+    return **_objectIterator;
 }
 
 #endif //WELT_OBJECTSEARCHCIRCLE_H
