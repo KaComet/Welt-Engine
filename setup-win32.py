@@ -20,5 +20,5 @@ os.makedirs(externFolder, exist_ok=True)
 os.chdir(externFolder)
 
 # SDL2 and SDL2_image
-downloadZip('https://www.libsdl.org/release/SDL2-devel-2.0.9-VC.zip', 'SDL2-2.0.9')
-downloadZip('https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.5.zip', 'SDL2_image-2.0.5')
+downloadZip('https://www.libsdl.org/release/SDL2-devel-2.0.10-VC.zip', 'SDL2-2.0.10')
+downloadZip('https://www.libsdl.org/projects/SDL_image/release/SDL2_image-devel-2.0.5-VC.zip', 'SDL2_image-2.0.5')

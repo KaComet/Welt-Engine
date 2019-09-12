@@ -20,8 +20,8 @@ foreach (_SDL2_component ${SDL2_FIND_COMPONENTS})
 endforeach ()
 
 if (WIN32)
-    # Search for SDL2 Debug CMake build in extern/SDL2-2.0.5-dev/build
-    find_path(SDL2_ROOT "include/SDL.h" PATHS "${CMAKE_CURRENT_LIST_DIR}/../extern/SDL2-2.0.5-dev" NO_DEFAULT_PATH)
+    # Search for SDL2 Debug CMake build in extern/SDL2-2.0.10/build
+    find_path(SDL2_ROOT "include/SDL.h" PATHS "${CMAKE_CURRENT_LIST_DIR}/../extern/SDL2-2.0.10" NO_DEFAULT_PATH)
     if (SDL2_ROOT)
         if (EXISTS "${SDL2_ROOT}/build/Debug/SDL2.lib")
             set(SDL2_INCLUDE_DIRS "${SDL2_ROOT}/include")
@@ -33,8 +33,8 @@ if (WIN32)
         endif ()
     endif ()
     if (NOT SDL2_FOUND)
-        # Search for SDL2 in extern/SDL2-2.0.5
-        find_path(SDL2_ROOT "include/SDL.h" PATHS "${CMAKE_CURRENT_LIST_DIR}/../extern/SDL2-2.0.5" NO_DEFAULT_PATH)
+        # Search for SDL2 in extern/SDL2-2.0.10
+        find_path(SDL2_ROOT "include/SDL.h" PATHS "${CMAKE_CURRENT_LIST_DIR}/../extern/SDL2-2.0.10" NO_DEFAULT_PATH)
         if (SDL2_ROOT)
             set(SDL2_INCLUDE_DIRS "${SDL2_ROOT}/include")
             if ("${CMAKE_GENERATOR}" MATCHES "Win64")
