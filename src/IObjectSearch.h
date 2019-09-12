@@ -11,7 +11,7 @@ using namespace std;
 template<class ObjectType, class ID_Type>
 class IObjectSearch {
 public:
-    IObjectSearch(vector<list<ObjectAndData<ObjectType, ID_Type> *>*> chunks)
+    explicit IObjectSearch(vector<list<ObjectAndData<ObjectType, ID_Type> *>*> chunks)
             : _chunksReference(chunks) {
         _isAtEnd = true;
     }
@@ -20,13 +20,13 @@ public:
 
     virtual void next() = 0;
 
-    virtual ID_Type id() = 0;
+    virtual ID_Type id() const = 0;
 
-    virtual Coordinate position() = 0;
+    virtual Coordinate position() const = 0;
 
     virtual ObjectType &object() = 0;
 
-    virtual ObjectAndData<ObjectType, ID_Type> ObjectAndDataCopy() = 0;
+    virtual ObjectAndData<ObjectType, ID_Type> ObjectAndDataCopy() const = 0;
 
     bool isAtEnd() {
         return _isAtEnd;

@@ -5,6 +5,7 @@
 #include "ObjectAndData.h"
 #include "IObjectSearch.h"
 #include <vector>
+#include <memory>
 #include <utility>
 
 using namespace std;
@@ -18,19 +19,14 @@ inline bool operator==(const ObjectAndData<Object, ID_Type> &op1, const ObjectAn
 template<class EntityType, class EntityID_Type, class ItemType, class ItemID_Type>
 class SearchResult {
 public:
-    SearchResult(IObjectSearch<EntityType, EntityID_Type> *entitiesFound = nullptr,
-                 IObjectSearch<ItemType, IID> *itemsFound = nullptr) : entitiesFound(entitiesFound),
+    SearchResult(shared_ptr<IObjectSearch<EntityType, EntityID_Type>> entitiesFound = nullptr,
+                 shared_ptr<IObjectSearch<ItemType, IID>> itemsFound = nullptr) : entitiesFound(entitiesFound),
                                                                        itemsFound(itemsFound) {
 
     }
 
-    ~SearchResult() {
-        delete entitiesFound;
-        delete itemsFound;
-    }
-
-    IObjectSearch<EntityType, EntityID_Type> *entitiesFound;
-    IObjectSearch<ItemType, ItemID_Type> *itemsFound;
+    shared_ptr<IObjectSearch<EntityType, EntityID_Type>> entitiesFound;
+    shared_ptr<IObjectSearch<ItemType, ItemID_Type>> itemsFound;
 };
 
 template<class EntityType, class EntityID_Type, class ItemType, class ItemID_Type>

@@ -20,13 +20,13 @@ public:
 
     void next() override;
 
-    ID_Type id() override;
+    ID_Type id() const override;
 
-    Coordinate position() override;
+    Coordinate position() const override;
 
     ObjectType &object() override;
 
-    ObjectAndData<ObjectType, ID_Type> ObjectAndDataCopy() override;
+    ObjectAndData<ObjectType, ID_Type> ObjectAndDataCopy() const override;
 
 protected:
     uint _radius;
@@ -104,12 +104,12 @@ void ObjectSearchCircle<ObjectType, ID_Type>::next() {
 }
 
 template<class ObjectType, class ID_Type>
-ID_Type ObjectSearchCircle<ObjectType, ID_Type>::id() {
+ID_Type ObjectSearchCircle<ObjectType, ID_Type>::id() const {
     return (*_objectIterator)->id();
 }
 
 template<class ObjectType, class ID_Type>
-Coordinate ObjectSearchCircle<ObjectType, ID_Type>::position() {
+Coordinate ObjectSearchCircle<ObjectType, ID_Type>::position() const {
     return (*_objectIterator)->coordinate();
 }
 
@@ -119,7 +119,7 @@ ObjectType &ObjectSearchCircle<ObjectType, ID_Type>::object() {
 }
 
 template<class ObjectType, class ID_Type>
-ObjectAndData<ObjectType, ID_Type> ObjectSearchCircle<ObjectType, ID_Type>::ObjectAndDataCopy() {
+ObjectAndData<ObjectType, ID_Type> ObjectSearchCircle<ObjectType, ID_Type>::ObjectAndDataCopy() const {
     return **_objectIterator;
 }
 

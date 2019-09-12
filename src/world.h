@@ -13,6 +13,7 @@
 #include "Iitem.h"
 #include <list>
 #include <vector>
+#include <memory>
 #include <utility>
 #include <cassert>
 #include <algorithm>

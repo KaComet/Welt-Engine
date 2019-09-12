@@ -1,5 +1,7 @@
 #include "world.h"
 
+#include <memory>
+
 
 World::World(uint height, uint width, uint energyPerTick = 100) {
     // Make sure the World has valid dimensions. If something is wrong, throw invalid_argument.
@@ -196,12 +198,12 @@ World::getObjectsOnTile(Coordinate cord, const bool getEntities, const bool getI
     // If it was specified to look for entities, scan through the the entities in the
     //   chunk, looking for an entity that is on the specified tile.
     if (getEntities)
-        result.entitiesFound = new ObjectSearchCircle<Ientity, EID>(entityChunk, cord, 0);
+        result.entitiesFound = std::make_shared<ObjectSearchCircle<Ientity, EID>>(entityChunk, cord, 0);
 
     // If it was specified to look for items, scan through the the items in the
     //   chunk, looking for items that are on the specified tile.
     if (getItems)
-        result.itemsFound = new ObjectSearchCircle<Iitem, IID>(itemChunk, cord, 0);
+        result.itemsFound = std::make_shared<ObjectSearchCircle<Iitem, IID>>(itemChunk, cord, 0);
 
     if (!result.entitiesFound)
         printf("Boi");
@@ -381,7 +383,7 @@ vector<uint> World::getChunksInRect(const Coordinate &rectStart, uint height, ui
     // If any portion of the rect was outside the chunk, verify the the overflow chunk (the max chunk) is in the vector.
     // If it is not, add it.
     if (outside) {
-        if (*result.end() != maxChunkNumber) {
+        if (result.back() != maxChunkNumber) {
             result.push_back(maxChunkNumber);
         }
     }
@@ -510,10 +512,10 @@ World::getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities
     }
 
     if (getEntities)
-        result.entitiesFound = new ObjectSearchCircle<Ientity, EID>(entityChunks, circleCenter, radius);
+        result.entitiesFound = std::make_shared<ObjectSearchCircle<Ientity, EID>>(entityChunks, circleCenter, radius);
 
     if (getItems)
-        result.itemsFound = new ObjectSearchCircle<Iitem, IID>(itemChunks, circleCenter, radius);
+        result.itemsFound = std::make_shared<ObjectSearchCircle<Iitem, IID>>(itemChunks, circleCenter, radius);
 
     return result;
 }

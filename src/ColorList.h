@@ -8,6 +8,7 @@
 #include <fstream>
 #include <algorithm>
 #include "resource.h"
+#include "universal.h"
 #include "FlatVector.h"
 
 class ColorList {
