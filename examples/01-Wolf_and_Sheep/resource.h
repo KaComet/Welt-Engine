@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <SDL.h>
-#include "universal.h"
+#include "../../src/universal.h"
 
 std::string getResourcePath(const std::string &subDir);
 

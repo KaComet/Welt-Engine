@@ -4,9 +4,9 @@
 #include <SDL.h>
 #include <string>
 #include "LTexture.h"
-#include "universal.h"
+#include "../../src/universal.h"
 #include <SDL_image.h>
-#include "DisplayIDdef.h"
+#include "../../src/DisplayIDdef.h"
 
 
 class SpriteSet {

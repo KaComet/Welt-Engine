@@ -1,16 +1,16 @@
 // main.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include "world.h"
+#include "../../src/world.h"
 #include "Sheep.h"
 #include "Wolf.h"
 #include "ltimer.h"
 #include "SpriteSet.h"
-#include "ColorList.h"
+#include "../../src/ColorList.h"
 #include "ItemTestStick.h"
 #include "SpriteInteractionsList.h"
-#include "material.h"
-#include "universal.h"
+#include "../../src/material.h"
+#include "../../src/universal.h"
 #include "resource.h"
 #include <SDL.h>
 #include <vector>
@@ -24,8 +24,8 @@ const uint ENERGY_PER_TICK = 100;
 // Sprite, SI, color, and file name constants
 const SpriteInteraction TI_ERROR = SpriteInteraction{"TI_ERROR", 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
 const SDL_Color COLOR_ERROR = SDL_Color{0xFF, 0x00, 0xFF};
-const std::string SIFileName = "spritedefinitions_default.txt";
-const std::string colorSetFileName = "colorset_default.txt";
+const std::string SIFileName = "example-01-Wolf_and_Sheep/spritedefinitions_default.txt";
+const std::string colorSetFileName = "example-01-Wolf_and_Sheep/colorset_default.txt";
 const std::string spriteSetFileName = "pixel_3x3.png";
 const uint TILE_WIDTH = 3;
 const uint TILE_HEIGHT = 3;
@@ -333,7 +333,7 @@ bool loadSpriteSetFromFile(SDL_Renderer *renderer, SpriteSet &spriteSet, const s
     printf("Loading tiles...\n");
 
     // Get the path of the SpriteSet and load it.
-    const std::string path = getResourcePath("tileset") + fileName;
+    const std::string path = getResourcePath("example-01-Wolf_and_Sheep/tileset") + fileName;
     const uint NTiles = spriteSet.loadFromFile(renderer, path, TILE_WIDTH, TILE_HEIGHT);
 
     // Print the number of elements loaded.

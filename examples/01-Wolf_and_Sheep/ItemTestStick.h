@@ -1,9 +1,9 @@
 #ifndef WELT_ITEMTESTSTICK_H
 #define WELT_ITEMTESTSTICK_H
 
-#include "universal.h"
-#include "material.h"
-#include "Iitem.h"
+#include "../../src/universal.h"
+#include "../../src/material.h"
+#include "../../src/Iitem.h"
 #include <typeinfo>
 #include <vector>
 

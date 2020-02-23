@@ -21,4 +21,4 @@ include_directories(${SDL2_IMAGE_INCLUDE_DIRS}
         ${SDL2main_INCLUDE_DIRS}
         ${CMAKE_BINARY_DIR})
 
-add_subdirectory(src)
+add_subdirectory(examples/01-Wolf_and_Sheep)

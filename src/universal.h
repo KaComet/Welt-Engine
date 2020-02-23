@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include "LTexture.h"
+#include "../examples/01-Wolf_and_Sheep/LTexture.h"
 
 // ---------------- Typedefs ----------------
 typedef unsigned int DisplayID;

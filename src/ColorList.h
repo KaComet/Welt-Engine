@@ -7,9 +7,9 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
-#include "resource.h"
+#include "../examples/01-Wolf_and_Sheep/resource.h"
 #include "universal.h"
-#include "FlatVector.h"
+#include "../include/FlatVector.h"
 
 class ColorList {
 public:

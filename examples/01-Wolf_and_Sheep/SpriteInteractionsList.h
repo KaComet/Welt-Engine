@@ -5,9 +5,9 @@
 #include <cctype>
 #include <fstream>
 #include <algorithm>
-#include "universal.h"
+#include "../../src/universal.h"
 #include "resource.h"
-#include "DisplayIDdef.h"
+#include "../../src/DisplayIDdef.h"
 
 // Stores mutable SpriteInteractions for easy use.
 

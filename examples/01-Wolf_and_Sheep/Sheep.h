@@ -1,15 +1,15 @@
-#ifndef WELT_P_C_WOLF_H
-#define WELT_P_C_WOLF_H
+#ifndef WELT_P_C_SHEEP_H
+#define WELT_P_C_SHEEP_H
 
-#include "Ientity.h"
-#include <vector>
+#include "../../src/Ientity.h"
 #include <cmath>
+#include <vector>
 
-class Wolf : public Ientity {
+class Sheep : public Ientity {
 public:
-    Wolf();
+    Sheep();
 
-    ~Wolf() override = default;
+    ~Sheep() override = default;
 
     std::vector<std::size_t> getEntityTypeHash() override;
 
@@ -27,13 +27,13 @@ public:
     DisplayID getDisplayID() override;
 
 protected:
-    std::vector<std::size_t> wolfHash();
+    std::vector<std::size_t> sheepHash();
 
 private:
-    const uint energyNeededForMoveAndAttack = 60;
-    const uint maxEnergy = 300;
+    const uint energyNeededForMove = 100;
+    const uint maxEnergy = 200;
     uint objectType, selfHealth, selfEnergy;
-    Material selfMaterial;
+    Material selfMaterial{};
     DisplayID entityDisplay;
 };
 
