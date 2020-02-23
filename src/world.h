@@ -49,12 +49,6 @@ public:
     SearchResult<Ientity, EID, Iitem, IID> getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) override;
 
     SearchResult<Ientity, EID, Iitem, IID>
-    getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntities, bool getItems) override;
-
-    SearchResult<Ientity, EID, Iitem, IID>
-    getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getEntities, bool getItems) override;
-
-    SearchResult<Ientity, EID, Iitem, IID>
     getObjectsInCircle(Coordinate circleCenter, uint radius, bool getEntities, bool getItems) override;
 
     bool addItem(Iitem *itemPtr, Coordinate cord) override;

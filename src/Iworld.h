@@ -46,12 +46,6 @@ public:
     getObjectsOnTile(Coordinate cord, bool getEntities, bool getItems) = 0;
 
     virtual SearchResult<EntityType, EntityID_Type, ItemType, ItemID_Type>
-    getObjectsInLine(Coordinate lineStart, Coordinate lineEnd, bool getEntities, bool getItems) = 0;
-
-    virtual SearchResult<EntityType, EntityID_Type, ItemType, ItemID_Type>
-    getObjectsInRect(Coordinate rectStart, uint height, uint width, bool getEntities, bool getItems) = 0;
-
-    virtual SearchResult<EntityType, EntityID_Type, ItemType, ItemID_Type>
     getObjectsInCircle(Coordinate circleCenter, uint Radius, bool getEntities, bool getItems) = 0;
 
     virtual bool addItem(ItemType *itemPtr, Coordinate cord) = 0;

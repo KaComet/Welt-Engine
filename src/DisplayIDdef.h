@@ -3,9 +3,9 @@
 
 #include <string>
 #include <vector>
-#include "FlatVector.h"
+#include "../include/FlatVector.h"
 #include "universal.h"
-#include "FlatVector.h"
+#include "../include/FlatVector.h"
 
 typedef unsigned int displayID; // For specifying a char/pic that is used to display an object.
 

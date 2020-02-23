@@ -28,7 +28,7 @@ public:
     Coordinate &mutCoordinate() {
         //TODO: Change this to a custom exception.
         if (*_lockPointer)
-            throw "Attempted to access a lock ObjectAndPointer.";
+            throw "Attempted to access a locked ObjectAndPointer.";
         else
             return _position;
     }
